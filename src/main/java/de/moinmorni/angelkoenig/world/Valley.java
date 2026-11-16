@@ -737,11 +737,12 @@ public final class Valley {
     // ---------- Gipfelkreuz ----------
 
     private static void summitCross(Plan p, Terrain t) {
-        int bx = 14;
-        int bz = 132;
+        // höchster Punkt rund um den Hauptgipfel im Süden (16/158, durch die Verbiegung etwas verschoben)
+        int bx = 16;
+        int bz = 158;
         int by = 0;
-        for (int x = 4; x <= 24; x++) {
-            for (int z = 122; z <= 142; z++) {
+        for (int x = -12; x <= 44; x++) {
+            for (int z = 130; z <= 186; z++) {
                 int h = t.height(x, z);
                 if (h > by) {
                     by = h;

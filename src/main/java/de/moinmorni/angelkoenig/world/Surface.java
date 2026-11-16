@@ -375,10 +375,10 @@ public final class Surface {
         if (top >= 130 && hollow >= 1 && slope <= 4 && patch > 0.3) {
             return true;
         }
-        if (top >= line && slope <= 2 && patch > 0.3) {
+        if (top >= line && slope <= 1 && patch > 0.52) {
             return true;
         }
-        return top >= line + 18 && slope <= 3 && patch > 0.45;
+        return top >= line + 28 && slope <= 2 && patch > 0.46;
     }
 
     /** Latschen: niedrige Kiefernbüsche über der Baumgrenze. */

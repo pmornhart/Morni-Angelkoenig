@@ -77,10 +77,17 @@ public final class Terrain {
      * Ein Gipfel: Mitte, Höhe, Fuß-Radien (länglich, gedreht), Steilheit der Flanken und Stärke der Grate. So sieht
      * jeder Berg anders aus – breite Stöcke, schlanke Hörner, lange Kämme.
      */
-    record Peak(double x, double z, double top, double rx, double rz, double angle, double steep, double ridges) {
+    record Peak(double x, double z, double top, double rx, double rz, double angle, double steep, double ridges,
+            boolean massive) {
 
-        Peak(double x, double z, double top, double radius) {
-            this(x, z, top, radius, radius, 0, 1.15, 0.3);
+        /** Schroffer Gipfel (Norden, Osten, Westen). */
+        Peak(double x, double z, double top, double rx, double rz, double angle, double steep, double ridges) {
+            this(x, z, top, rx, rz, angle, steep, ridges, false);
+        }
+
+        /** Kräftiger Alpengipfel (Süden): breiter Fuß, massige Grate, keine Nadeln. */
+        static Peak massive(double x, double z, double top, double rx, double rz, double angle) {
+            return new Peak(x, z, top, rx, rz, angle, 1, 0, true);
         }
     }
 
@@ -97,21 +104,22 @@ public final class Terrain {
     }
 
     private static final List<Peak> PEAKS = List.of(
-            // Süden, hinter dem See (Blick vom Dorf): breiter Stock, hohes Horn, langer Kamm
-            new Peak(-64, 124, 192, 70, 48, 0.4, 1.6, 0.45), new Peak(16, 136, 208, 74, 54, -0.3, 1.35, 0.55),
-            new Peak(98, 132, 182, 72, 40, 0.9, 1.9, 0.35),
+            // Süden, hinter dem See (Blick vom Dorf): kräftige Stöcke mit breitem Fuß und massigen Graten
+            Peak.massive(-64, 142, 184, 74, 56, 0.4), Peak.massive(16, 158, 198, 80, 60, -0.3),
+            Peak.massive(98, 150, 178, 76, 52, 0.9), Peak.massive(-152, 124, 174, 64, 50, -0.5),
+            Peak.massive(168, 146, 178, 66, 54, 0.3),
             // Vorgipfel davor
-            new Peak(-28, 104, 142, 34, 24, 0.2, 0.95, 0.5), new Peak(52, 108, 150, 32, 26, -0.6, 0.95, 0.6),
-            new Peak(-100, 98, 136, 32, 22, 1.1, 1.0, 0.4),
+            Peak.massive(-28, 116, 138, 38, 30, 0.2), Peak.massive(52, 120, 142, 36, 30, -0.6),
+            Peak.massive(-100, 110, 132, 36, 28, 1.1),
             // Westen, Norden, Osten
-            new Peak(-152, 106, 180, 60, 44, -0.5, 1.4, 0.5), new Peak(-182, -16, 172, 52, 70, 0.2, 1.7, 0.4),
+ new Peak(-182, -16, 172, 52, 70, 0.2, 1.7, 0.4),
             new Peak(-54, -152, 158, 74, 40, 0.1, 1.8, 0.35), new Peak(56, -144, 166, 50, 50, 0, 1.3, 0.5),
             new Peak(10, -120, 128, 36, 26, 0.5, 1.0, 0.4), new Peak(152, -112, 160, 56, 46, 0.7, 1.5, 0.45),
-            new Peak(184, 22, 176, 48, 66, -0.2, 1.6, 0.4), new Peak(168, 130, 184, 62, 50, 0.3, 1.35, 0.5),
+            new Peak(184, 22, 176, 48, 66, -0.2, 1.6, 0.4),
             new Peak(-120, -100, 140, 38, 30, -0.8, 1.0, 0.45));
 
-    private static final List<Cirque> CIRQUES = List.of(new Cirque(-58, 104, 20, 26), new Cirque(10, 112, 22, 30),
-            new Cirque(-146, 86, 18, 22), new Cirque(50, -122, 18, 20), new Cirque(150, -92, 16, 18));
+    private static final List<Cirque> CIRQUES = List.of(new Cirque(-58, 120, 24, 14), new Cirque(10, 130, 26, 16),
+            new Cirque(-146, 102, 22, 12), new Cirque(50, -122, 18, 20), new Cirque(150, -92, 16, 18));
 
     private final List<Carve> carves = new ArrayList<>();
     private final List<Carve> late = new ArrayList<>();
@@ -215,9 +223,17 @@ public final class Terrain {
             double n = Noise.fbm(wx / 64, wz / 64, 11, 4);
             h += s * 120 * (0.16 + 0.6 * rg + 0.24 * n);
         }
+        double massive = 0;
         for (Peak p : PEAKS) {
             h = Math.max(h, peak(p, wx, wz, 0, 0, 1, 1));
-            if (p.top() >= 170) {
+            if (p.massive()) {
+                massive = Math.max(massive, 1 - Noise.smoothstep(0.75, 1.05, reach(p, wx, wz)));
+                // Nebengipfel dicht am Hauptgipfel: dazwischen ein hoher, breiter Grat statt einzelner Spitzen
+                double ax = Math.cos(p.angle()) * p.rx();
+                double az = Math.sin(p.angle()) * p.rx();
+                h = Math.max(h, peak(p, wx, wz, ax * 0.42, az * 0.42, 0.88, 0.78));
+                h = Math.max(h, peak(p, wx, wz, -ax * 0.36, -az * 0.36, 0.83, 0.72));
+            } else if (p.top() >= 170) {
                 // zweiter, etwas niedrigerer Gipfel am Grat: Massiv statt Kegel
                 double off = 0.42;
                 h = Math.max(h, peak(p, wx, wz, Math.cos(p.angle()) * p.rx() * off,
@@ -230,7 +246,7 @@ public final class Terrain {
         if (h > 95) {
             double gully = 1 - Noise.ridge(wx / 13.0 + wz / 40.0, wz / 13.0, 57, 2);
             double depth = Math.min(1, (h - 95) / 40);
-            h -= 9 * depth * gully * gully;
+            h -= 9 * (1 - 0.65 * massive) * depth * gully * gully;
         }
         for (Cirque k : CIRQUES) {
             double d = Math.hypot(wx - k.x(), wz - k.z()) / k.radius();
@@ -242,11 +258,56 @@ public final class Terrain {
         return h;
     }
 
+    /**
+     * Kräftiger Alpengipfel: Profil zwischen Pyramide und S-Kurve – am Fuß breit auslaufend, oben ein klarer, aber
+     * stumpfer Gipfel; Rippen in den Flanken, leichte Wellen im Grat, kaum Ausbuchtungen im Umriss.
+     */
+    private static double massivePeak(Peak p, double wx, double wz, double ox, double oz, double scale, double size) {
+        double dx = wx - p.x() - ox;
+        double dz = wz - p.z() - oz;
+        double c = Math.cos(p.angle());
+        double sn = Math.sin(p.angle());
+        double u = (dx * c + dz * sn) / (p.rx() * size * BROAD);
+        double v = (-dx * sn + dz * c) / (p.rz() * size * BROAD);
+        // drei oder vier Grate laufen vom Gipfel herab, dazwischen breite Flanken (dort sammelt sich Schnee)
+        double ang = Math.atan2(v, u);
+        int arms = 3 + Noise.pick((int) p.x(), (int) p.z(), 63, 2);
+        double arm = 0.5 + 0.5 * Math.cos(arms * (ang - p.angle() * 1.7));
+        double lobe = 0.8 + 0.3 * arm * arm + 0.12 * (Noise.fbm(Math.cos(ang) * 1.4 + p.x() * 0.01,
+                Math.sin(ang) * 1.4 + p.z() * 0.01, 53, 2) - 0.5);
+        double d = Math.sqrt(u * u + v * v) / lobe;
+        if (d >= 1) {
+            return 63;
+        }
+        double t = 1 - d;
+        // oben ein klarer Gipfelaufbau (keine Kuppe, keine Nadel)
+        double summit = Math.pow(Math.max(0, (t - 0.78) / 0.22), 1.6);
+        double body = (0.62 * t + 0.38 * t * t * (3 - 2 * t) + 0.07 * summit) / 1.07;
+        double swell = 0.93 + 0.14 * Noise.fbm(wx / 45, wz / 45, 59, 2);
+        double ribs = 26 * t * (1 - t) * (Noise.ridge(wx / 28, wz / 28, 61, 2) - 0.45);
+        double crag = Noise.fbm(wx / 9, wz / 9, 17, 2);
+        return 63 + (p.top() - 63) * scale * body * swell + ribs + 5 * (crag - 0.5) * t;
+    }
+
     /** Breite der Gipfel: flachere Flanken, breitere Stöcke statt Nadeln. */
     private static final double BROAD = 1.3;
 
     /** Höhe eines Gipfels (verschoben um ox/oz, Höhe und Breite skaliert); 63, wenn die Stelle außerhalb liegt. */
+    /** Abstand zur Mitte eines Gipfels: 0 in der Mitte, 1 am Fuß (ohne Ausbuchtungen). */
+    private static double reach(Peak p, double wx, double wz) {
+        double dx = wx - p.x();
+        double dz = wz - p.z();
+        double c = Math.cos(p.angle());
+        double sn = Math.sin(p.angle());
+        double u = (dx * c + dz * sn) / (p.rx() * BROAD);
+        double v = (-dx * sn + dz * c) / (p.rz() * BROAD);
+        return Math.sqrt(u * u + v * v);
+    }
+
     private static double peak(Peak p, double wx, double wz, double ox, double oz, double scale, double size) {
+        if (p.massive()) {
+            return massivePeak(p, wx, wz, ox, oz, scale, size);
+        }
         double dx = wx - p.x() - ox;
         double dz = wz - p.z() - oz;
         double c = Math.cos(p.angle());
