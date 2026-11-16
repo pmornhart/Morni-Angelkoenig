@@ -7,6 +7,8 @@ import de.moinmorni.angelkoenig.data.PlayerData;
 import de.moinmorni.angelkoenig.fish.Bait;
 import de.moinmorni.angelkoenig.fish.Cosmetic;
 import de.moinmorni.angelkoenig.fish.Rod;
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.ItemAttributeModifiers;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -128,6 +130,9 @@ public final class Hotbar {
             }
         });
         Items.glow(item, c == Cosmetic.KOENIGSKRONE);
-        return Items.tool(item, "cosmetic");
+        ItemStack out = Items.tool(item, "cosmetic");
+        // Kleidung ist nur Schmuck: keine Rüstungspunkte (sonst steht über den Herzen eine Rüstungsleiste)
+        out.setData(DataComponentTypes.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.itemAttributes().build());
+        return out;
     }
 }

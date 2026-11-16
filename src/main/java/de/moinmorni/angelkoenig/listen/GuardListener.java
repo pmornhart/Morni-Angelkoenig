@@ -26,6 +26,7 @@ import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerRecipeDiscoverEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
 
 /**
@@ -47,6 +48,14 @@ public final class GuardListener implements Listener {
 
     private boolean ours(World w) {
         return w == plugin.world();
+    }
+
+    /** Im Tal wird nicht gekocht: keine „Rezept freigeschaltet“-Hinweise, wenn ein Fisch im Korb landet. */
+    @EventHandler(ignoreCancelled = true)
+    public void onRecipe(PlayerRecipeDiscoverEvent e) {
+        if (ours(e.getPlayer().getWorld())) {
+            e.setCancelled(true);
+        }
     }
 
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)

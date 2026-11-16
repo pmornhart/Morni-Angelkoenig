@@ -53,6 +53,8 @@ public final class Angling {
     private static final int TICKS = 20;
     private static final int LURE_MIN = 20;
     private static final int LURE_MAX = 60;
+    /** So lange steht der Biss-Hinweis in der Aktionsleiste. */
+    private static final long BITE_HINT_MS = 3000;
     /** Belohnung, wenn alle Arten im Fischbuch stehen. */
     static final int BOOK_COMPLETE = 1000;
 
@@ -143,10 +145,21 @@ public final class Angling {
         }
     }
 
+    /** Eingeholt ohne Fang: der Biss-Hinweis verschwindet gleich wieder. */
+    public void reeled(Player p) {
+        Long t = bites.get(p.getUniqueId());
+        if (t != null && System.currentTimeMillis() - t < BITE_HINT_MS) {
+            p.sendActionBar(Component.empty());
+        }
+    }
+
     /** Ein Fisch hängt am Haken. */
     public void caught(PlayerFishEvent e) {
         Player p = e.getPlayer();
         UUID uuid = p.getUniqueId();
+        // der Biss-Hinweis hat ausgedient (bei seltenen Fängen kommt ein Titel statt einer neuen Aktionsleiste)
+        p.sendActionBar(Component.empty());
+        Location at = e.getHook().getLocation();
         String lang = pl.lang(p);
         PlayerData d = pl.data(p);
         Spot spot = spotAt(e.getHook().getLocation());
@@ -184,12 +197,12 @@ public final class Angling {
             if (d.speciesCount() == Species.fishes().size()) {
                 d.earn(BOOK_COMPLETE);
                 p.sendMessage(Texts.msg(lang, "catch.book-done", Placeholder.unparsed("n", String.valueOf(BOOK_COMPLETE))));
-                celebrate(p.getLocation());
+                celebrate(at);
             }
         }
         boolean record = !c.species().junk() && pl.records().offer(uuid, p.getName(), c, today.toEpochDay());
         pl.records().totals(uuid, p.getName(), d.catches(), d.tournamentsWon(), d.legendary());
-        announce(p, lang, c, first, personal && !first, record);
+        announce(p, lang, c, first, personal && !first, record, at);
         if (full) {
             p.sendMessage(Texts.msg(lang, "catch.full"));
         }
@@ -228,7 +241,7 @@ public final class Angling {
         }
     }
 
-    private void announce(Player p, String lang, Catch c, boolean first, boolean personal, boolean record) {
+    private void announce(Player p, String lang, Catch c, boolean first, boolean personal, boolean record, Location at) {
         Species s = c.species();
         TagResolver colour = Texts.colour(s.rarity().colour());
         String fish = Texts.plain(lang, "species." + s.id());
@@ -256,7 +269,7 @@ public final class Angling {
             Ui.title(p, Texts.text(lang, "catch.title", colour, Placeholder.unparsed("fish", fish)),
                     Texts.text(lang, "catch.legendary.sub"), 3500);
             Ui.sound(p, "ui.toast.challenge_complete", 1.0f);
-            celebrate(p.getLocation());
+            celebrate(at);
             for (Player o : pl.world().getPlayers()) {
                 String ol = pl.lang(o);
                 o.sendMessage(Texts.msg(ol, "catch.legendary.all", Placeholder.unparsed("name", p.getName()),
@@ -277,7 +290,7 @@ public final class Angling {
         }
     }
 
-    /** Kleines Feuerwerk über dem Steg bzw. am Spieler. */
+    /** Kleines Feuerwerk über der Fangstelle (nicht vor dem Gesicht des Anglers). */
     public void celebrate(Location at) {
         Location l = at.clone().add(0, 2, 0);
         Firework fw = l.getWorld().spawn(l, Firework.class, f -> {

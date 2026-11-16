@@ -232,8 +232,8 @@ public final class Texts {
         t("fish.lore.trophy", "<au>★ Prachtexemplar</au>", "<au>★ Trophy fish</au>");
 
         // ---------- Fang ----------
-        t("catch.msg", "Du hast <c><fish></c> gefangen! <gray>(<size>)</gray>", "You caught <c><fish></c>! <gray>(<size>)</gray>");
-        t("catch.find", "Du hast <c><fish></c> herausgezogen. <gray>(<size>)</gray>", "You pulled out <c><fish></c>. <gray>(<size>)</gray>");
+        t("catch.msg", "<c><fish></c> gefangen! <gray><size></gray>", "You caught <c><fish></c>! <gray><size></gray>");
+        t("catch.find", "<c><fish></c> herausgezogen. <gray><size></gray>", "You pulled out <c><fish></c>. <gray><size></gray>");
         t("catch.size", "<len> · <weight>", "<len> · <weight>");
         t("catch.first", "<em>Neu im Fischbuch!</em> <au>+<n> Taler</au>", "<em>New in your fish book!</em> <au>+<n> thaler</au>");
         t("catch.book-done", "<au>\u2726 Fischbuch vollständig!</au> <gray>Alle Arten des Tals gefangen –</gray> <au>+<n> Taler</au><gray>!</gray>",
@@ -431,9 +431,8 @@ public final class Texts {
                 "<au>The fishing contest starts in <secs> seconds!</au> <gray>Whoever lands the heaviest fish in <mins> minutes wins.</gray>");
         t("tourney.start", "<au>Das Angel-Turnier läuft!</au> <gray><mins> Minuten – der schwerste Fisch gewinnt. Petri Heil!</gray>",
                 "<au>The fishing contest is on!</au> <gray><mins> minutes – the heaviest fish wins. Tight lines!</gray>");
-        t("tourney.start.title", "<au>♛ Angel-Turnier</au>", "<au>♛ Fishing contest</au>");
-        t("tourney.start.sub", "<gray>Der schwerste Fisch gewinnt – <white><mins> Minuten</white></gray>",
-                "<gray>The heaviest fish wins – <white><mins> minutes</white></gray>");
+        t("tourney.start.title", "<au>Angel-Turnier</au>", "<au>Fishing contest</au>");
+        t("tourney.start.sub", "<gray>Der schwerste Fisch gewinnt</gray>", "<gray>The heaviest fish wins</gray>");
         t("tourney.bar", "Angel-Turnier · <time> · <leader>", "Fishing contest · <time> · <leader>");
         t("tourney.bar.leader", "vorn: <name> (<weight>)", "leading: <name> (<weight>)");
         t("tourney.bar.nobody", "noch kein Fang", "no catch yet");

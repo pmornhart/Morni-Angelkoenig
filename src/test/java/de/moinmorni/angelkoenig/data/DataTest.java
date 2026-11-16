@@ -45,6 +45,9 @@ class DataTest {
         assertFalse(d.spend(10));
         d.sold(300);
         assertEquals(300, d.earnedTotal());
+        d.earn(25);
+        assertEquals(325, d.earnedTotal(), "Belohnungen zählen auch als verdient");
+        assertTrue(d.spend(25));
         assertTrue(d.spend(250));
         assertEquals(50, d.taler());
         assertFalse(d.useRod(Rod.ESCHE), "nicht gekauft");

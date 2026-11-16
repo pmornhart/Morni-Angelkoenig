@@ -26,9 +26,12 @@ public final class Ui {
         p.playSound(Sound.sound(Key.key(key), Sound.Source.MASTER, 1f, pitch));
     }
 
-    /** Sekunden als „1:05“. */
+    /** Sekunden als „1:05“, ab einer Stunde als „3:13:10“. */
     public static String clock(long seconds) {
         long s = Math.max(0, seconds);
+        if (s >= 3600) {
+            return String.format(Locale.ROOT, "%d:%02d:%02d", s / 3600, s / 60 % 60, s % 60);
+        }
         return String.format(Locale.ROOT, "%d:%02d", s / 60, s % 60);
     }
 

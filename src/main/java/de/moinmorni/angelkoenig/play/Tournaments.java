@@ -85,8 +85,7 @@ public final class Tournaments {
         for (Player p : players()) {
             String lang = pl.lang(p);
             p.sendMessage(Texts.msg(lang, "tourney.start", Placeholder.unparsed("mins", mins)));
-            Ui.title(p, Texts.text(lang, "tourney.start.title"), Texts.text(lang, "tourney.start.sub",
-                    Placeholder.unparsed("mins", mins)), 2500);
+            Ui.title(p, Texts.text(lang, "tourney.start.title"), Texts.text(lang, "tourney.start.sub"), 2500);
             Ui.sound(p, "block.bell.use", 1.0f);
             Ui.sound(p, "item.goat_horn.sound.0", 1.0f);
         }
@@ -187,11 +186,15 @@ public final class Tournaments {
                 p.sendMessage(Texts.msg(lang, "tourney.crown"));
             }
         }
-        Location steg = new Location(pl.world(), 0.5, Layout.STAND_Y, -9.5);
-        pl.angling().celebrate(steg);
+        // über dem See vor dem Steg (nicht zwischen den Anglern)
+        Location lake = new Location(pl.world(), 0.5, Layout.WATER_Y + 1, 6.5);
+        pl.angling().celebrate(lake);
         Player winner = Bukkit.getPlayer(win.uuid());
         if (winner != null) {
-            pl.angling().celebrate(winner.getLocation());
+            // ein paar Schritte vor dem Sieger, damit er Titel und Feuerwerk sieht
+            Location front = winner.getLocation();
+            front.add(front.getDirection().setY(0).normalize().multiply(7)).add(0, 1, 0);
+            pl.angling().celebrate(front);
         }
         ranking.forEach(e -> pl.angling().flush(e.uuid()));
         pl.boards().refreshRecords();

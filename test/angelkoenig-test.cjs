@@ -279,7 +279,7 @@ async function main() {
   check('Echter Fang am Bergsee', ok && f, f && plain(f.customName));
   check('Fang mit Name, Länge, Gewicht, Ort und Wert', f && /Länge: [\d,]+ cm · Gewicht/.test(lore(f)) && /Bergsee/.test(lore(f))
     && /Wert: \d+ Taler/.test(lore(f)), f && lore(f));
-  check('Fang-Nachricht im Chat', sees(anna, /Du hast .+ (gefangen|herausgezogen)/), anna.chats.slice(-3).join(' | '));
+  check('Fang-Nachricht im Chat', sees(anna, /» .+ (gefangen!|herausgezogen\.) [\d,]+ (cm|g|kg)/), anna.chats.slice(-3).join(' | '));
   check('Biss wird angesagt (Aktionsleiste)', anna.bars.some((b) => /Biss!/.test(b)), anna.bars.slice(-4).join(' | '));
   await cmd('angeladmin naechster Anna seesaibling 40');
   clear(anna);

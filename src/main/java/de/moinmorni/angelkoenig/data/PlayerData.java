@@ -79,14 +79,15 @@ public final class PlayerData {
         return taler;
     }
 
+    /** Taler gutschreiben (Verkauf, Fischbuch, Aufgaben, Turnier) – zählt in „verdient“. */
     public void earn(long amount) {
         taler += Math.max(0, amount);
+        earned += Math.max(0, amount);
     }
 
-    /** Taler für einen Verkauf gutschreiben (zählt auch in „verdient“). */
+    /** Taler für einen Verkauf gutschreiben. */
     public void sold(long amount) {
         earn(amount);
-        earned += Math.max(0, amount);
     }
 
     public long earnedTotal() {

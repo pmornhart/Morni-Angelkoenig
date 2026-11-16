@@ -73,11 +73,14 @@ public final class Layout {
     public static final int BOARD_WALL_X = -15;
     public static final int BOARD_WALL_Z1 = -52;
     public static final int BOARD_WALL_Z2 = -39;
-    /** Mitte der drei Tafeln (vor der Wand, Blick nach Osten). */
+    /**
+     * Unterkante der drei Tafeln (vor der Wand, Blick nach Osten). Schrift wächst nach oben – so tief, dass auch die
+     * längste Tafel unter das Vordach passt.
+     */
     public static final Place[] BOARDS = {
-        new Place(-13.6, STAND_Y + 2.6, -49.0, -90f, 0f),
-        new Place(-13.6, STAND_Y + 2.6, -45.5, -90f, 0f),
-        new Place(-13.6, STAND_Y + 2.6, -42.0, -90f, 0f),
+        new Place(-13.6, STAND_Y + 1.6, -49.0, -90f, 0f),
+        new Place(-13.6, STAND_Y + 1.6, -45.5, -90f, 0f),
+        new Place(-13.6, STAND_Y + 1.6, -42.0, -90f, 0f),
     };
     /** Lagerfeuer mit Bänken. */
     public static final int FIRE_X = -27;
