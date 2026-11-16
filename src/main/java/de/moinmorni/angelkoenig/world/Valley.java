@@ -215,7 +215,8 @@ public final class Valley {
                 p.set(x, y, z, Math.floorMod(x, 2) == 0 ? "white_wool" : "light_blue_wool");
             }
         }
-        Kit.hangingLantern(p, (x1 + x2) / 2, S + 2, z1 + 1, 0);
+        Kit.hangingLantern(p, x1 + 1, S + 2, z1 + 1, 0);
+        Kit.hangingLantern(p, x2 - 1, S + 2, z1 + 1, 0);
         p.sign((x1 + x2) / 2 + 1, S + 2, z1 - 1, "spruce_wall_sign[facing=north]", "", "Fischhändler",
                 "Fishmonger", "");
         p.set((x1 + x2) / 2 + 1, S + 2, z1, "spruce_planks");
