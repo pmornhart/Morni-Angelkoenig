@@ -87,4 +87,60 @@ class TournamentTest {
         assertFalse(t.running());
         assertTrue(t.end(19 * MIN).isEmpty());
     }
+
+    /** Zurück ins Spiel: Wer im Turnier die Verbindung verliert, behält seinen Platz eine Weile. */
+    @Test
+    void placeIsKeptForAWhileAfterTheConnectionDrops() {
+        Tournament t = make(0);
+        assertFalse(t.away(ANNA, 0, 90_000), "ohne Turnier wird nichts freigehalten");
+        t.start(0);
+        t.record(ANNA, "Anna", CatchRules.sized(Species.HECHT, 80, 1), 1000);
+        t.record(BERT, "Bert", CatchRules.sized(Species.ROTAUGE, 20, 1), 1000);
+        assertTrue(t.away(ANNA, 10_000, 20_000));
+        assertTrue(t.waitingFor(ANNA));
+        assertEquals(1, t.place(ANNA), "der Platz zählt, solange gewartet wird");
+        assertEquals(List.of(), t.expired(30_000), "genau zur Frist zählt noch");
+        assertEquals(Tournament.Return.IN_TIME, t.back(ANNA, 30_000));
+        assertFalse(t.waitingFor(ANNA));
+        assertEquals(1, t.place(ANNA), "rechtzeitig zurück: Platz und Fang bleiben");
+        assertEquals(Tournament.Return.NONE, t.back(ANNA, 31_000), "niemand wartet mehr");
+    }
+
+    @Test
+    void tooLateFreesThePlace() {
+        Tournament t = make(0);
+        t.start(0);
+        t.record(ANNA, "Anna", CatchRules.sized(Species.HECHT, 80, 1), 1000);
+        t.record(BERT, "Bert", CatchRules.sized(Species.ROTAUGE, 20, 1), 1000);
+        t.away(ANNA, 10_000, 20_000);
+        t.away(BERT, 12_000, 20_000);
+        assertEquals(List.of(ANNA), t.expired(30_001));
+        assertEquals(0, t.place(ANNA), "Platz frei");
+        assertEquals(1, t.place(BERT), "Bert wartet noch – sein Platz zählt");
+        assertEquals(Tournament.Return.TOO_LATE, t.back(BERT, 40_000), "kommt nach der Frist, bevor sie abgelaufen gemeldet wurde");
+        assertTrue(t.ranking().isEmpty());
+    }
+
+    @Test
+    void withoutGraceTimeLeavingGivesUpThePlace() {
+        Tournament t = make(0);
+        t.start(0);
+        t.record(ANNA, "Anna", CatchRules.sized(Species.HECHT, 80, 1), 1000);
+        assertFalse(t.away(ANNA, 2000, 0), "0 = aus");
+        assertFalse(t.waitingFor(ANNA));
+        assertEquals(0, t.place(ANNA));
+    }
+
+    @Test
+    void endOfContestCountsHeldPlacesAndReleasesThem() {
+        Tournament t = make(0);
+        t.start(0);
+        t.record(ANNA, "Anna", CatchRules.sized(Species.HECHT, 80, 1), 1000);
+        t.away(ANNA, 2000, 90_000);
+        List<Tournament.Entry> ranking = t.end(3000);
+        assertEquals("Anna", ranking.get(0).name(), "wer gerade weg ist, zählt mit seinem Platz");
+        assertEquals(List.of(ANNA), t.releaseAway());
+        assertEquals(List.of(), t.releaseAway());
+        assertEquals(Tournament.Return.NONE, t.back(ANNA, 4000));
+    }
 }

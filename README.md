@@ -18,7 +18,10 @@ Englischer Name: **Angler King**. Kennung im Netzwerk: `angelkoenig`.
    **Köder** (locken bestimmte Arten) und **Kleidung** zum Angeben. Taler gibt es nur im Spiel – nichts für echtes Geld.
 5. **Angel-Turnier** zur vollen Viertelstunde (eine Minute vorher angesagt, ab 2 Leuten): 5 Minuten, der schwerste
    Fisch gewinnt. Leiste oben mit Restzeit und Führendem, Preise für Platz 1–3, der Sieger wird **Angelkönig** und
-   bekommt die Königskrone.
+   bekommt die Königskrone. Wer im Tal ist, macht mit; wer das Tal verlässt, gibt seinen Platz auf. **Zurück ins
+   Spiel:** Verliert jemand während des Turniers die Verbindung (zum Beispiel, weil das Spiel abstürzt), bleibt sein
+   Platz samt bestem Fang `rueckkehr-sekunden` lang frei (Vorgabe 90, 0 = aus). Rechtzeitig zurück – direkt oder über
+   „Zurück ins Spiel“ in der Lobby – angelt er dort weiter, wo er war; endet das Turnier vorher, zählt sein Platz.
 
 ## Fangplätze
 
@@ -54,15 +57,18 @@ Königskrone (nur für Turniersieger).
 | `/fischbuch` · `/aufgaben` · `/wegweiser` · `/koeder` · `/kleiderschrank` | dieselben Fenster wie in der Schnellleiste |
 | `/turnier` | wann das nächste Turnier ist |
 | `/stats [spieler]` · `/top [faenge\|turniere\|rekorde]` | Statistik und Bestenlisten |
-| `/angeladmin info\|status\|turnier start\|ende\|stopp\|zeit …\|wetter …\|taler …\|naechster …\|fisch …\|fischbuch …\|aufgabe …\|melden\|neubauen\|neuladen` | Verwaltung und Tests (`moinmorni.angelkoenig.admin`); `fisch <spieler> <art> [cm]` legt einen Fang in den Korb, `fischbuch <spieler> alle\|leer\|<art>` füllt oder leert das Fischbuch (für Bilder) |
+| `/angeladmin info\|status\|turnier start\|ende\|stopp\|zeit …\|wetter …\|taler …\|geld [spieler] <betrag>\|naechster …\|fisch …\|fischbuch …\|aufgabe …\|melden\|neubauen\|neuladen` | Verwaltung und Tests (`moinmorni.angelkoenig.admin`); `fisch <spieler> <art> [cm]` legt einen Fang in den Korb, `fischbuch <spieler> alle\|leer\|<art>` füllt oder leert das Fischbuch (für Bilder), `geld [spieler] <betrag>` gibt Taler dazu – ohne Spieler einem selbst (für Owner und Admins zum Testen), `taler <spieler> <betrag>` setzt sie |
 
-Einstellungen stehen in der `config.yml` (Tageszeit, Wetter, Biss-Zeiten, Startgeld, Turnier an/aus, Abstand, Dauer,
-Preise).
+Einstellungen stehen in der `config.yml` (Zurück ins Spiel, Tageszeit, Wetter, Biss-Zeiten, Startgeld, Turnier an/aus,
+Abstand, Dauer, Preise).
 
 ## Im Netzwerk
 
 Mit dem Netzwerk-Plugin („MoinMorni“, Schnittstelle `de.moinmorni.api.MoinMorni`): Sprache, Party (wer später kommt,
 landet bei seiner Party), Statistik, Zustand und zurück zur Lobby. Ohne Netzwerk: deutsche Texte, Statistik nur lokal.
+Ab Schnittstelle 2 „spielt“ jeder im Tal, solange ein Turnier läuft (dann fragen „/lobby“ und der Lobby-Knopf erst
+nach), und ein freigehaltener Turnierplatz erscheint in der Lobby als „Zurück ins Spiel“; mit einem älteren
+Netzwerk-Plugin läuft alles wie bisher.
 
 - Statistik (`stats("angelkoenig", …)`): hochgezählt `catches`, `legendary`, `tournaments_won`; Bestwerte
   `heaviest_g` (schwerster Fisch in Gramm) und `species` (Arten im Fischbuch).

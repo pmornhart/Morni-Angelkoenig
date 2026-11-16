@@ -25,6 +25,26 @@ Kennung im Netzwerk `angelkoenig`, englisch „Angler King“.
 
 ## Stand (16.11.2026)
 
+- Version 0.1.1 (Branch `claude/zurueck-ins-spiel`, wartet auf Philips Go): **Zurück ins Spiel** (Philip: „mitten im
+  Spiel nochmal fragen, ob man wirklich zur Lobby will; nach einem Absturz zurück ins Spiel“). Netzwerk-Schnittstelle 2
+  (byte-gleiche Kopie; `askToLobby`, `playing`, `holdSlot`; älteres Netzwerk-Plugin → `LinkageError` einmal im Log,
+  sonst wie bisher). Wer im Tal ist, macht beim laufenden Turnier mit und „spielt“ (Start, Nachzügler, Ende, Abbruch;
+  `Tournaments.syncPlaying`), der Lobby-Knopf ruft `askToLobby`. Regel neu: Wer das Tal während des Turniers verlässt,
+  gibt seinen Platz auf – nach einem Verbindungsabbruch erst nach `rueckkehr-sekunden` (neu oben in der config.yml,
+  Vorgabe 90, 0 = sofort; Regeln in `fish/Tournament`: `away`, `back`, `expired`, `releaseAway`), `holdSlot`.
+  Rechtzeitig zurück: Platz und bester Fang bleiben, man angelt dort weiter, wo man war (`welcome(p, keepPlace)`),
+  „Willkommen zurück!“ mit Platz; zu spät: Platz frei, liegt er vorn, wird die neue Führung angesagt; endet das Turnier
+  vorher, zählt der Platz mit Preis und das Angebot geht zurück (holdSlot 0). Neu für Owner/Admins: `/angeladmin geld
+  [spieler] <betrag>` (Taler dazu, ohne Spieler für einen selbst, zählt nicht als „verdient“, de/en); `status` zeigt
+  `weg`. Test-Netzwerk schreibt `playing`, `ask-lobby`, `hold-slot`; `test/run.sh` mit `MEMORY` (Vorgabe 2G).
+  JUnit 6.1.3. Geprüft: 51 Unit-Tests (4 neu in `TournamentTest`), Paper 26.1 übersetzt, echt (`test/run.sh`,
+  `rueckkehr-sekunden: 20`) **100/100**, Log ohne Fehler – neu: im Turnier spielen alle im Tal, Lobby-Knopf fragt
+  nach (Anna bleibt), Anna geht (holdSlot 20, Bert liest es englisch, ihr Platz zählt weiter, `weg=1`) und kommt
+  rechtzeitig zurück („Dein Platz im Turnier ist frei geblieben: Hecht (5,50 kg), Platz 1“, am selben Steg, holdSlot
+  0), Bert kommt zu spät (Platz frei, holdSlot 0, beim Wiederkommen wie sonst im Dorf), nach dem Turnier spielt
+  niemand, `geld` an Carl, an sich selbst, falscher Betrag erklärt den Befehl, Lobby-Knopf ohne Turnier ohne
+  Nachfrage.
+
 - Version 0.1.0 (Branch `claude/erster-stand`, noch nicht veröffentlicht – wartet auf Philips Go).
 - 47 Unit-Tests grün (Fangtabellen, Köder, Angeln, Größen, Preise, Aufgaben, Turnier, Wetter, Tageszeit, Spielerdaten,
   Bestenliste, Texte; Gelände: alle Gewässer dicht, Fangplätze stehen vor ihrem Wasser, Wege begehbar, keine alten
@@ -77,7 +97,9 @@ Kennung im Netzwerk `angelkoenig`, englisch „Angler King“.
 
 ## Offen
 
-- Philip: Bilder ansehen, im echten Spiel angeln; Go für `main` (dann erstes Release v0.1.0).
+- Philip: Go für `main` mit 0.1.1 (Zurück ins Spiel, Taler zum Testen).
+- Netzwerk-Repo: Einstellungs-Katalog um `rueckkehr-sekunden` ergänzen (0–600, Vorgabe 90).
+- Nicht echt geprüft: Rückkehr über das echte Netzwerk (Lobby-Angebot „Zurück ins Spiel“).
 - Nicht echt geprüft: Bedrock (Menüs sind Truhen), Ruderboote mit echtem Client, Turnier-Automatik zur Viertelstunde
   im laufenden Server (nur Unit-Test; im Test per Befehl), Paper 26.3 als Server (nur gebaut).
 - Netzwerk-Repo: `MODE_REPOS` (`angelkoenig: 'pmornhart/Morni-Angelkoenig'`), Lobby-Figur, Webseite (Modus-Seite,

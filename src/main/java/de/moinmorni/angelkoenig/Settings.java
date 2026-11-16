@@ -19,7 +19,13 @@ public record Settings(
         int tournamentWarn,
         int tournamentMinPlayers,
         List<Integer> prizes,
-        int participation) {
+        int participation,
+        int comebackSeconds) {
+
+    /** Höchstens so lange bleibt ein Turnierplatz nach einem Verbindungsabbruch frei. */
+    static final int MAX_COMEBACK_SECONDS = 600;
+    /** Vorgabe für {@code rueckkehr-sekunden}. */
+    static final int COMEBACK_SECONDS = 90;
 
     static Settings load(FileConfiguration c) {
         List<Integer> prizes = c.getIntegerList("turnier.preise").stream().map(p -> clamp(p, 0, 1_000_000)).toList();
@@ -39,7 +45,8 @@ public record Settings(
                 clamp(c.getInt("turnier.vorwarnung-sekunden", 60), 0, 600),
                 clamp(c.getInt("turnier.mindestens-spieler", 2), 1, 100),
                 prizes.isEmpty() ? List.of(250, 120, 60) : prizes,
-                clamp(c.getInt("turnier.teilnahme", 15), 0, 1_000_000));
+                clamp(c.getInt("turnier.teilnahme", 15), 0, 1_000_000),
+                clamp(c.getInt("rueckkehr-sekunden", COMEBACK_SECONDS), 0, MAX_COMEBACK_SECONDS));
     }
 
     private static int clamp(int v, int min, int max) {

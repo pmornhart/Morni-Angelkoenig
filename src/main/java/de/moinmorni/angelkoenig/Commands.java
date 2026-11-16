@@ -235,6 +235,7 @@ public final class Commands implements TabExecutor {
                 pl.store().save(pl.data(p));
                 s.sendMessage(Texts.text(lang, "admin.done"));
             }
+            case "geld" -> giveMoney(s, a);
             case "naechster" -> {
                 Player p = a.length > 2 ? Bukkit.getPlayerExact(a[1]) : null;
                 Optional<Species> sp = a.length > 2 ? Species.byId(a[2]) : Optional.empty();
@@ -338,6 +339,55 @@ public final class Commands implements TabExecutor {
         }
     }
 
+    /** Höchstens so viel auf einmal (Tippfehler sollen kein Vermögen machen). */
+    private static final long MAX_GIFT = 1_000_000L;
+
+    /**
+     * Zum Testen (Owner und Admins): {@code geld [spieler] <betrag>} gibt Taler dazu – ohne Spieler bekommt man sie
+     * selbst. Zählt nicht als „verdient“. Beide erfahren es freundlich in ihrer Sprache.
+     */
+    private void giveMoney(CommandSender s, String[] a) {
+        String lang = lang(s);
+        Player target;
+        String amountArg;
+        if (a.length == 2 && s instanceof Player self) {
+            target = self;
+            amountArg = a[1];
+        } else if (a.length >= 3) {
+            target = Bukkit.getPlayerExact(a[1]);
+            amountArg = a[2];
+            if (target == null) {
+                s.sendMessage(Texts.msg(lang, "admin.money.unknown", Placeholder.unparsed("name", a[1])));
+                return;
+            }
+        } else {
+            s.sendMessage(Texts.msg(lang, "admin.money.usage"));
+            return;
+        }
+        long amount;
+        try {
+            amount = Long.parseLong(amountArg.startsWith("+") ? amountArg.substring(1) : amountArg);
+        } catch (NumberFormatException e) {
+            amount = 0;
+        }
+        if (amount < 1 || amount > MAX_GIFT) {
+            s.sendMessage(Texts.msg(lang, "admin.money.usage"));
+            return;
+        }
+        PlayerData d = pl.data(target);
+        d.setTaler(d.taler() + amount);
+        pl.store().save(d);
+        pl.updateSidebar(target);
+        String tl = pl.lang(target);
+        if (!target.equals(s)) {
+            s.sendMessage(Texts.msg(lang, "admin.money.done", Placeholder.unparsed("name", target.getName()),
+                    Placeholder.unparsed("n", Units.number(amount, lang)), Placeholder.unparsed("total",
+                            Units.number(d.taler(), lang))));
+        }
+        target.sendMessage(Texts.msg(tl, "admin.money.got", Placeholder.unparsed("n", Units.number(amount, tl)),
+                Placeholder.unparsed("total", Units.number(d.taler(), tl))));
+    }
+
     /** Länge in Zentimetern aus einem Argument (Komma oder Punkt), sonst der Vorgabewert. */
     private static double centimetres(String[] a, int i, double fallback) {
         if (a.length <= i) {
@@ -364,6 +414,7 @@ public final class Commands implements TabExecutor {
         for (Tournament.Entry e : t.ranking()) {
             sb.append(" t:").append(e.name()).append('=').append(e.grams());
         }
+        sb.append(" weg=").append(pl.tournaments().awayCount());
         for (Player p : pl.world().getPlayers()) {
             PlayerData d = pl.data(p);
             sb.append('\n').append(p.getName()).append(" taler=").append(d.taler()).append(" faenge=").append(d.catches())
@@ -387,7 +438,7 @@ public final class Commands implements TabExecutor {
         List<String> options = new ArrayList<>();
         if (name.equals("angeladmin")) {
             if (args.length == 1) {
-                options.addAll(List.of("info", "status", "turnier", "zeit", "wetter", "taler", "naechster", "aufgabe",
+                options.addAll(List.of("info", "status", "turnier", "zeit", "wetter", "taler", "geld", "naechster", "aufgabe",
                         "fisch", "fischbuch", "melden", "neubauen", "neuladen"));
             } else if (args.length == 2) {
                 switch (args[0].toLowerCase(Locale.ROOT)) {

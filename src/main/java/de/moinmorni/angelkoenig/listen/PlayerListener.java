@@ -61,8 +61,16 @@ public final class PlayerListener implements Listener {
             d.introSeen(true);
         }
         plugin.angling().ensureQuests(d);
-        plugin.welcome(p);
+        // Zurück ins Spiel: Läuft das Turnier noch und ist der Platz frei geblieben, angelt man dort weiter, wo man war.
+        boolean back = plugin.tournaments().rejoin(p);
+        plugin.welcome(p, back);
         String lang = plugin.lang(p);
+        if (back) {
+            plugin.tournaments().greetBack(p);
+            plugin.store().save(d);
+            plugin.stateChanged();
+            return;
+        }
         Ui.title(p, Texts.text(lang, "welcome.title"), Texts.text(lang, "welcome.subtitle"), 2500);
         if (fresh) {
             for (String k : new String[] {"intro.1", "intro.2", "intro.3", "intro.4"}) {
@@ -97,7 +105,7 @@ public final class PlayerListener implements Listener {
     public void onQuit(PlayerQuitEvent e) {
         Player p = e.getPlayer();
         e.quitMessage(null);
-        plugin.tournaments().forget(p);
+        plugin.tournaments().quit(p);
         plugin.angling().flush(p.getUniqueId());
         plugin.angling().forget(p.getUniqueId());
         plugin.sidebar().forget(p.getUniqueId());
@@ -143,7 +151,8 @@ public final class PlayerListener implements Listener {
             case "lobby" -> {
                 p.sendMessage(Texts.msg(plugin.lang(p), "lobby.going"));
                 plugin.angling().flush(p.getUniqueId());
-                plugin.net().toLobby(p, Texts.text(plugin.lang(p), "lobby.kick"));
+                // Das Netzwerk fragt nach, solange das Turnier läuft (sonst geht es sofort).
+                plugin.net().askToLobby(p, Texts.text(plugin.lang(p), "lobby.kick"));
             }
             default -> {
             }

@@ -9,8 +9,11 @@ import de.moinmorni.angelkoenig.fish.Catch;
 import de.moinmorni.angelkoenig.fish.Tournament;
 import de.moinmorni.angelkoenig.fish.Units;
 import de.moinmorni.angelkoenig.world.Layout;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import net.kyori.adventure.bossbar.BossBar;
@@ -23,6 +26,10 @@ import org.bukkit.entity.Player;
 /**
  * Das Angel-Turnier im Spiel: Ankündigung, Start mit Titel, Leiste oben mit Restzeit und Führendem, Wertung am Ende
  * mit Talern, Königskrone und neuem Angelkönig. Die Regeln selbst stehen in {@link Tournament}.
+ *
+ * <p>Wer im Tal ist, macht mit und „spielt gerade“ (dann fragt „/lobby“ im Netzwerk erst nach). Verliert jemand
+ * während des Turniers die Verbindung, bleibt sein Platz {@code rueckkehr-sekunden} lang frei – so lange bietet die
+ * Lobby „Zurück ins Spiel“ an.
  */
 public final class Tournaments {
 
@@ -32,6 +39,10 @@ public final class Tournaments {
     private final BossBar barDe = BossBar.bossBar(Component.empty(), 1f, BossBar.Color.YELLOW, BossBar.Overlay.NOTCHED_10);
     private final BossBar barEn = BossBar.bossBar(Component.empty(), 1f, BossBar.Color.YELLOW, BossBar.Overlay.NOTCHED_10);
     private final Set<UUID> seeing = new HashSet<>();
+    /** Wem das Netzwerk gerade „spielt“ glaubt (nur Änderungen werden gemeldet). */
+    private final Set<UUID> told = new HashSet<>();
+    /** Namen derer, die gerade weg sind und zurückkommen dürfen (für die Meldungen). */
+    private final Map<UUID, String> awayNames = new HashMap<>();
     private UUID leader;
 
     public Tournaments(AngelkoenigPlugin pl) {
@@ -66,6 +77,10 @@ public final class Tournaments {
                 case Tournament.Skip skip -> players().forEach(p -> p.sendMessage(Texts.msg(pl.lang(p), "tourney.skip")));
             }
         }
+        for (UUID u : t.expired(now)) {
+            late(u);
+        }
+        syncPlaying();
         updateBar(now);
     }
 
@@ -89,6 +104,7 @@ public final class Tournaments {
             Ui.sound(p, "block.bell.use", 1.0f);
             Ui.sound(p, "item.goat_horn.sound.0", 1.0f);
         }
+        syncPlaying();
         pl.stateChanged();
     }
 
@@ -111,6 +127,7 @@ public final class Tournaments {
             t.abort(System.currentTimeMillis());
             players().forEach(p -> p.sendMessage(Texts.msg(pl.lang(p), "tourney.stopped")));
             hideBars();
+            release();
             pl.stateChanged();
         }
     }
@@ -124,7 +141,17 @@ public final class Tournaments {
         String lang = pl.lang(p);
         p.sendMessage(Texts.msg(lang, "tourney.best", Placeholder.unparsed("weight", Units.weight(c.grams(), lang)),
                 Placeholder.unparsed("n", String.valueOf(t.place(p.getUniqueId())))));
-        Tournament.Entry top = t.ranking().get(0);
+        announceLeader();
+    }
+
+    /** Wer jetzt vorn liegt, erfahren alle – aber nur, wenn sich die Führung geändert hat. */
+    private void announceLeader() {
+        List<Tournament.Entry> ranking = t.ranking();
+        if (ranking.isEmpty()) {
+            leader = null;
+            return;
+        }
+        Tournament.Entry top = ranking.get(0);
         if (!top.uuid().equals(leader)) {
             leader = top.uuid();
             for (Player o : players()) {
@@ -136,8 +163,148 @@ public final class Tournaments {
         }
     }
 
+    // ---------- Zurück ins Spiel ----------
+
+    /**
+     * Jemand verlässt den Server (Verbindung weg, Lobby). Im laufenden Turnier bleibt sein Platz samt bestem Fang
+     * {@code rueckkehr-sekunden} lang frei ({@code holdSlot}); ohne Frist ist er gleich weg.
+     */
+    public void quit(Player p) {
+        UUID u = p.getUniqueId();
+        forget(p);
+        // Das Netzwerk vergisst „spielt gerade“, sobald jemand den Server verlässt.
+        told.remove(u);
+        if (!t.running()) {
+            return;
+        }
+        int seconds = pl.settings().comebackSeconds();
+        boolean placed = t.entry(u) != null;
+        String name = p.getName();
+        if (t.away(u, System.currentTimeMillis(), seconds * SECOND)) {
+            awayNames.put(u, name);
+            pl.net().holdSlot(u, seconds);
+            for (Player o : players()) {
+                if (!o.equals(p)) {
+                    o.sendMessage(Texts.msg(pl.lang(o), "tourney.away", Placeholder.unparsed("name", name),
+                            Placeholder.unparsed("secs", String.valueOf(seconds))));
+                }
+            }
+        } else if (placed) {
+            gone(name);
+        }
+    }
+
+    /**
+     * Wiederkommen: Läuft das Turnier noch und ist der Platz frei geblieben, geht es weiter (true) – Minecraft hat Ort
+     * und Fänge gespeichert. Zu spät: der Platz ist weg (false – man kommt wie sonst ins Dorf).
+     */
+    public boolean rejoin(Player p) {
+        UUID u = p.getUniqueId();
+        switch (t.back(u, System.currentTimeMillis())) {
+            case IN_TIME -> {
+                awayNames.remove(u);
+                pl.net().holdSlot(u, 0);
+                tell(p, true);
+                return true;
+            }
+            case TOO_LATE -> {
+                late(u);
+                return false;
+            }
+            default -> {
+                return false;
+            }
+        }
+    }
+
+    /** Nach {@link #rejoin}: Willkommen zurück – mit dem Stand im Turnier. */
+    public void greetBack(Player p) {
+        String lang = pl.lang(p);
+        Ui.title(p, Texts.text(lang, "tourney.back.title"), Texts.text(lang, "tourney.back.sub"), 2500);
+        Ui.sound(p, "entity.player.levelup", 1.2f);
+        Tournament.Entry e = t.entry(p.getUniqueId());
+        if (e == null) {
+            p.sendMessage(Texts.msg(lang, "tourney.back"));
+        } else {
+            p.sendMessage(Texts.msg(lang, "tourney.back.placed", Placeholder.unparsed("n",
+                    String.valueOf(t.place(p.getUniqueId()))), Placeholder.unparsed("weight", Units.weight(e.grams(), lang)),
+                    Placeholder.unparsed("fish", Texts.plain(lang, "species." + e.species().id()))));
+        }
+        for (Player o : players()) {
+            if (!o.equals(p)) {
+                o.sendMessage(Texts.msg(pl.lang(o), "tourney.back.all", Placeholder.unparsed("name", p.getName())));
+            }
+        }
+    }
+
+    /** Nicht rechtzeitig zurück: Platz frei, Angebot zurückgenommen. */
+    private void late(UUID u) {
+        pl.net().holdSlot(u, 0);
+        String name = awayNames.remove(u);
+        if (name == null) {
+            return;
+        }
+        for (Player o : players()) {
+            o.sendMessage(Texts.msg(pl.lang(o), "tourney.away.late", Placeholder.unparsed("name", name)));
+        }
+        if (u.equals(leader)) {
+            announceLeader();
+        }
+    }
+
+    /** Ohne Rückkehr-Frist (0): Wer geht, gibt seinen Platz gleich auf. */
+    private void gone(String name) {
+        for (Player o : players()) {
+            o.sendMessage(Texts.msg(pl.lang(o), "tourney.left", Placeholder.unparsed("name", name)));
+        }
+        if (leader != null && t.entry(leader) == null) {
+            announceLeader();
+        }
+    }
+
+    /** Wie viele gerade weg sind und zurückkommen dürfen (für /angeladmin status). */
+    public int awayCount() {
+        return awayNames.size();
+    }
+
+    /** Turnier vorbei oder abgebrochen: niemand muss mehr zurück, niemand spielt mehr. */
+    private void release() {
+        for (UUID u : t.releaseAway()) {
+            pl.net().holdSlot(u, 0);
+        }
+        awayNames.clear();
+        syncPlaying();
+    }
+
+    /** Wer im Tal ist, spielt, solange das Turnier läuft – sonst niemand. */
+    private void syncPlaying() {
+        boolean on = t.running();
+        Set<UUID> here = new HashSet<>();
+        for (Player p : players()) {
+            here.add(p.getUniqueId());
+            tell(p, on);
+        }
+        for (UUID u : new ArrayList<>(told)) {
+            Player p = Bukkit.getPlayer(u);
+            if (p == null) {
+                told.remove(u);
+            } else if (!here.contains(u)) {
+                tell(p, false);
+            }
+        }
+    }
+
+    /** Dem Netzwerk sagen, ob jemand gerade spielt (dann fragt „/lobby“ erst nach) – nur bei Änderungen. */
+    private void tell(Player p, boolean playing) {
+        if (playing ? told.add(p.getUniqueId()) : told.remove(p.getUniqueId())) {
+            pl.net().playing(p, playing);
+        }
+    }
+
     private void finished(List<Tournament.Entry> ranking) {
         hideBars();
+        // Wer gerade weg war, zählt mit seinem Platz – das Angebot „Zurück ins Spiel“ ist aber vorbei.
+        release();
         List<Integer> prizes = pl.settings().prizes();
         int thanks = pl.settings().participation();
         if (ranking.isEmpty()) {
