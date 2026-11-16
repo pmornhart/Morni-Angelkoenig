@@ -64,6 +64,12 @@ Kennung im Netzwerk `angelkoenig`, englisch „Angler King“.
   nicht noch einmal, Köder-Hinweis in der Aktionsleiste nur noch, wenn die Dose fast leer ist (Anzahl steht an der
   Köderdose und in der Leiste). Turnier-Automatik im laufenden Server gesehen: zur Viertelstunde Vorwarnung und Start
   mit zwei Anglern.
+- **Name wieder MoinMorni** (16.11. abends): Die Umbenennung vom Nachmittag ist per `git revert` zurückgenommen, der
+  neue Name war nicht verfügbar – Paket `de.moinmorni.angelkoenig`, Schnittstelle `de.moinmorni.api.MoinMorni`,
+  `softdepend: [MoinMorni]`, Recht `moinmorni.angelkoenig.admin`, Texte und Leiste mit MoinMorni/moinmorni.net,
+  Test-Netzwerk „MoinMorni“; der Feinschliff danach bleibt. `run.sh` räumt ältere Test-Netzwerk-Jars weg. Plugin-Name,
+  Datenordner (`plugins/MorniAngelkoenig/`) und Kennung `angelkoenig` waren nie anders. Danach: 47 Unit-Tests,
+  `-Ppaper-26.1 compile` und echter Test **83/83** grün, Angelkönig meldet sich beim Test-Netzwerk „MoinMorni“.
 - Beobachtet (nicht geklärt): Einmal blieb im echten Client 26.3 (über ViaVersion an Paper 26.1.2) Regen sichtbar,
   obwohl das Tal laut Server klar war; nach neuem Einloggen weg. Wohl Wetter-Abgleich über Via, nicht das Plugin.
 - Funde behoben: Wegweiser-Platz am Bergsee warf den Schwimmer auf die Stegkante; Fänge landeten im Wasser statt im

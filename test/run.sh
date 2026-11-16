@@ -102,6 +102,8 @@ if [ "${FRESH:-0}" = "1" ]; then
   rm -rf "$SERVER/angelkoenig" "$SERVER/plugins/MorniAngelkoenig/welt.yml"
 fi
 cp "$REPO/target/Morni-Angelkoenig.jar" "$SERVER/plugins/"
+# nur ein Test-Netzwerk im Server (auch keine ältere Fassung unter anderem Namen)
+rm -f "$SERVER"/plugins/*-FakeNetwork.jar
 cp "$REPO/test/fake-network/target/MoinMorni-FakeNetwork.jar" "$SERVER/plugins/"
 for jar in ${EXTRA_PLUGINS:-}; do
   cp "$jar" "$SERVER/plugins/"
