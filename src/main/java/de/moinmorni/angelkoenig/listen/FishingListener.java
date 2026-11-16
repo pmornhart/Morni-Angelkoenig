@@ -29,6 +29,7 @@ public final class FishingListener implements Listener {
         }
         switch (e.getState()) {
             case FISHING -> plugin.angling().cast(p, e.getHook());
+            case BITE -> plugin.angling().bite(p);
             case CAUGHT_FISH -> plugin.angling().caught(e);
             case CAUGHT_ENTITY -> {
                 e.setCancelled(true);

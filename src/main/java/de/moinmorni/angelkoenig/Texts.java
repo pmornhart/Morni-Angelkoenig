@@ -247,6 +247,7 @@ public final class Texts {
         t("catch.legendary.sub", "<au>✦ Ein legendärer Fang! ✦</au>", "<au>✦ A legendary catch! ✦</au>");
         t("catch.legendary.all", "<au><name></au> <gray>hat</gray> <au><fish></au> <gray>gefangen –</gray> <white><weight></white><gray>!</gray>",
                 "<au><name></au> <gray>caught</gray> <au><fish></au> <gray>–</gray> <white><weight></white><gray>!</gray>");
+        t("catch.bite", "<au><b>❗ Biss!</b></au> <gray>Schnell einholen!</gray>", "<au><b>❗ Bite!</b></au> <gray>Reel it in!</gray>");
         t("catch.full", "<gray>Dein Korb ist voll – der Fang schwimmt wieder davon. Verkauf deine Fänge beim <em>Fischhändler</em>!</gray>",
                 "<gray>Your basket is full – the catch swims away again. Sell your catches at the <em>fishmonger</em>!</gray>");
         t("catch.bait", "<gray>Köder: <white><bait></white> · noch <white><n></white></gray>",
@@ -494,8 +495,8 @@ public final class Texts {
         t("top.usage", "<gray>/top [faenge|turniere|rekorde]</gray>", "<gray>/top [catches|wins|records]</gray>");
 
         // ---------- Verwaltung ----------
-        t("admin.usage", "<gray>/angeladmin info|status|turnier <start|ende|stopp>|zeit <morgen|tag|abend|nacht>|wetter <klar|regen|gewitter>|taler <spieler> <betrag>|naechster <spieler> <art> [cm]|aufgabe <spieler> <0-2> <art:ziel:anzahl:belohnung>|melden|neubauen|neuladen</gray>",
-                "<gray>/angeladmin info|status|turnier <start|ende|stopp>|zeit <morgen|tag|abend|nacht>|wetter <klar|regen|gewitter>|taler <spieler> <betrag>|naechster <spieler> <art> [cm]|aufgabe <spieler> <0-2> <art:ziel:anzahl:belohnung>|melden|neubauen|neuladen</gray>");
+        t("admin.usage", "<gray>/angeladmin info|status|turnier <start|ende|stopp>|zeit <morgen|tag|abend|nacht>|wetter <klar|regen|gewitter>|taler <spieler> <betrag>|naechster <spieler> <art> [cm]|fisch <spieler> <art> [cm]|fischbuch <spieler> <alle|leer|art> [cm]|aufgabe <spieler> <0-2> <art:ziel:anzahl:belohnung>|melden|neubauen|neuladen</gray>",
+                "<gray>/angeladmin info|status|turnier <start|ende|stopp>|zeit <morgen|tag|abend|nacht>|wetter <klar|regen|gewitter>|taler <spieler> <betrag>|naechster <spieler> <art> [cm]|fisch <spieler> <art> [cm]|fischbuch <spieler> <alle|leer|art> [cm]|aufgabe <spieler> <0-2> <art:ziel:anzahl:belohnung>|melden|neubauen|neuladen</gray>");
         t("admin.done", "<em>Erledigt.</em>", "<em>Done.</em>");
         t("admin.rebuild", "<gray>Beim nächsten Start entsteht das Tal neu.</gray>", "<gray>The valley will be rebuilt on the next start.</gray>");
         t("admin.reloaded", "<em>Einstellungen neu geladen.</em>", "<em>Settings reloaded.</em>");

@@ -54,7 +54,7 @@ Königskrone (nur für Turniersieger).
 | `/fischbuch` · `/aufgaben` · `/wegweiser` · `/koeder` · `/kleiderschrank` | dieselben Fenster wie in der Schnellleiste |
 | `/turnier` | wann das nächste Turnier ist |
 | `/stats [spieler]` · `/top [faenge\|turniere\|rekorde]` | Statistik und Bestenlisten |
-| `/angeladmin info\|status\|turnier start\|ende\|stopp\|zeit …\|wetter …\|taler …\|naechster …\|aufgabe …\|melden\|neubauen\|neuladen` | Verwaltung und Tests (`moinmorni.angelkoenig.admin`) |
+| `/angeladmin info\|status\|turnier start\|ende\|stopp\|zeit …\|wetter …\|taler …\|naechster …\|fisch …\|fischbuch …\|aufgabe …\|melden\|neubauen\|neuladen` | Verwaltung und Tests (`moinmorni.angelkoenig.admin`); `fisch <spieler> <art> [cm]` legt einen Fang in den Korb, `fischbuch <spieler> alle\|leer\|<art>` füllt oder leert das Fischbuch (für Bilder) |
 
 Einstellungen stehen in der `config.yml` (Tageszeit, Wetter, Biss-Zeiten, Startgeld, Turnier an/aus, Abstand, Dauer,
 Preise).

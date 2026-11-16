@@ -141,6 +141,16 @@ public final class PlayerData {
         return book.get(s);
     }
 
+    /** Verwaltung: Fischbuch und Fangzähler leeren (Taler, Angeln, Siege bleiben). */
+    public void resetBook() {
+        book.clear();
+        catches = 0;
+        finds = 0;
+        legendary = 0;
+        heaviest = 0;
+        heaviestSpecies = "";
+    }
+
     public boolean knows(Species s) {
         return book.containsKey(s);
     }

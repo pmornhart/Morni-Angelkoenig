@@ -216,7 +216,9 @@ async function fishOnce(bot, where, tries = 4) {
       const got = await waitFor(() => fishes(bot).length > before || bot.chats.slice(beforeChats).some((c) =>
         /gefangen|caught|herausgezogen|pulled out|Korb ist voll|basket is full/.test(c)), 6000);
       if (got) {
-        await sleep(600);
+        // der Fang landet erst ein paar Ticks später im Korb – bei viel Last auch mal später
+        await waitFor(() => fishes(bot).length > before, 4000);
+        await sleep(200);
         return true;
       }
     }
@@ -278,12 +280,14 @@ async function main() {
   check('Fang mit Name, Länge, Gewicht, Ort und Wert', f && /Länge: [\d,]+ cm · Gewicht/.test(lore(f)) && /Bergsee/.test(lore(f))
     && /Wert: \d+ Taler/.test(lore(f)), f && lore(f));
   check('Fang-Nachricht im Chat', sees(anna, /Du hast .+ (gefangen|herausgezogen)/), anna.chats.slice(-3).join(' | '));
+  check('Biss wird angesagt (Aktionsleiste)', anna.bars.some((b) => /Biss!/.test(b)), anna.bars.slice(-4).join(' | '));
   await cmd('angeladmin naechster Anna seesaibling 40');
   clear(anna);
   ok = await fishOnce(anna, 'bergsee');
   f = fishes(anna).find((i) => plain(i.customName) === 'Seesaibling');
   check('Seesaibling mit 40,0 cm (Fang festgelegt)', ok && f && lore(f).includes('40,0 cm'), f && lore(f));
-  check('Seltener Fang: Titel', anna.titles.some((t) => t.includes('Seesaibling')), anna.titles.join(','));
+  check('Seltener Fang: Titel', await waitFor(() => anna.titles.some((t) => t.includes('Seesaibling')), 3000),
+    anna.titles.join(','));
   check('Neu im Fischbuch mit Bonus (+30 Taler für einen seltenen Fisch)', sees(anna, /Neu im Fischbuch! \+30 Taler/), anna.chats.filter((c) => /Fischbuch/.test(c)).join(' | '));
   s = await status();
   check('Aufgabe „2 Fische am Bergsee“ erledigt: 25 + 5 + 30 (Fischbuch) + 40 = 100 Taler', s.players.Anna.a[0].done && s.players.Anna.taler === 100
@@ -429,7 +433,8 @@ async function main() {
   await cmd('angeladmin turnier start');
   check('Turnier beginnt: Ansage auf Deutsch und Englisch', await waitFor(() => sees(anna, /Das Angel-Turnier läuft/)
     && sees(bert, /fishing contest is on/), 3000), anna.chats.slice(-1)[0]);
-  check('Turnier-Titel', anna.titles.some((t) => /Angel-Turnier/.test(t)), anna.titles.join(','));
+  check('Turnier-Titel', await waitFor(() => anna.titles.some((t) => /Angel-Turnier/.test(t)), 3000),
+    anna.titles.join(','));
   check('Netzwerk: Zustand „tournament“', await waitFor(() => calls().some((c) => c.t === 'state' && c.state === 'tournament'), 3000));
   await cmd('angeladmin naechster Anna hecht 100');
   await cmd('angeladmin naechster Bert rotauge 30');
@@ -501,6 +506,18 @@ async function main() {
   check('Begrüßung beim Wiederkommen', sees(anna2, /Schön, dass du wieder da bist/) && !sees(anna2, /Willkommen im Tal/));
   check('Krone wieder auf, Eschenrute in der Hand', anna2.inventory.slots[5]?.name === 'golden_helmet'
     && plain(slot(anna2, 0)?.customName).includes('Eschenrute'));
+
+  // ------------------------------------------------------------------ Verwaltung: Fänge und Fischbuch (für Bilder)
+  await cmd('angeladmin fisch Carl goldforelle 45');
+  check('/angeladmin fisch: Goldforelle mit 45,0 cm im Korb', await waitFor(() => fishes(carl).some((i) =>
+    plain(i.customName) === 'Goldforelle' && lore(i).includes('45,0 cm')), 3000), fishes(carl).map((i) => plain(i.customName)).join(','));
+  await cmd('angeladmin fischbuch Carl alle');
+  s = await status();
+  check('/angeladmin fischbuch alle: alle 20 Arten', s.players.Carl?.arten === 20, JSON.stringify(s.players.Carl));
+  await cmd('angeladmin fischbuch Carl leer');
+  s = await status();
+  check('/angeladmin fischbuch leer: keine Art mehr', s.players.Carl?.arten === 0 && s.players.Carl?.faenge === 0,
+    JSON.stringify(s.players.Carl));
 
   // ------------------------------------------------------------------ Lobby
   await openWithItem(bert, 8);

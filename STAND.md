@@ -17,7 +17,7 @@ Kennung im Netzwerk `angelkoenig`, englisch „Angler King“.
   meiste Fänge, Turniersiege, Angelkönig), `Store`.
 - `world/`: `Terrain` (Gelände aus Rauschen, Aushüben, Felsstufe, Wegen, Gewässern; Biome), `Shape`, `Noise`,
   `Layout` (feste Stellen), `Plan` + `Kit` + `Valley` (alle Bauten), `Surface` (Blöcke je Chunk inkl. Bäume, Blumen,
-  Schilf, Seerosen), `Palette`, `AngelGenerator` (Chunk-Erzeuger), `WorldSetup` (`VERSION` 9, Neubau, Schilder, Banner).
+  Schilf, Seerosen), `Palette`, `AngelGenerator` (Chunk-Erzeuger), `WorldSetup` (`VERSION` 12, Neubau, Schilder, Banner).
 - `play/`: `Angling` (Biss, Fang, Fischbuch, Aufgaben, Verkauf, Netzwerk-Statistik), `FishItems`, `Hotbar`, `Menus`
   (Fischhändler, Köderdose, Kleiderschrank, Fischbuch, Aufgaben, Wegweiser), `Tournaments`, `Boards`, `Npcs`,
   `Ambience`, `Seats`. `listen/`: `PlayerListener`, `FishingListener`, `GuardListener`. `net/`, `menu/` wie die anderen Modi.
@@ -45,6 +45,14 @@ Kennung im Netzwerk `angelkoenig`, englisch „Angler King“.
   Felsstufe, Felsflanke daneben gestuft mit Vorsprüngen, Moos, Farn, Ranken, Felsbrocken an der Gumpe, Gischt an Stufe
   und Gumpe; Händlerschild „Xaver / Fische / Fish“. Neubau 5 → 6 → … → 9 echt geprüft, echter Test wieder 78/78,
   Bilder `~/mm-cache/bilder-angelkoenig/v2/`.
+- Feinschliff (Bau-Version 12): Die Kette im Süden (Blick vom See) sind jetzt kräftige Alpengipfel statt
+  Felsnadeln – breiter Fuß, Profil zwischen Pyramide und S-Kurve, drei bis vier massige Grate je Gipfel, Nebengipfel
+  dicht am Hauptgipfel (hoher Grat dazwischen), flachere Rinnen, etwas weiter vom See weg, so dass die Gipfel samt
+  Gipfelkreuz frei vor dem Himmel stehen; Norden, Osten und Westen unverändert. Schnee auf flachen Stellen nur noch
+  fleckig. Neubau 9 → 10 → 11 → 12 echt geprüft, Bild `~/mm-cache/bilder-angelkoenig/v3/05-see-blick.jpg`.
+- Biss-Hinweis „❗ Biss! Schnell einholen!“ in der Aktionsleiste; Verwaltung `/angeladmin fisch` (Fang in den Korb)
+  und `/angeladmin fischbuch alle|leer|<art>` für Bilder und Tests; `status` meldet, wie lange der letzte Biss her ist.
+  Echter Test jetzt **82/82** (Wartezeiten im Test robuster gegen Last).
 - Funde behoben: Wegweiser-Platz am Bergsee warf den Schwimmer auf die Stegkante; Fänge landeten im Wasser statt im
   Korb (kommen jetzt sicher an); Sitz holte einen nach einer Reise zurück; `brick_planks` gibt es nicht.
 

@@ -62,6 +62,7 @@ public final class Angling {
     private final Map<UUID, Double> forcedCm = new HashMap<>();
     private final Map<UUID, Map<String, Long>> pending = new HashMap<>();
     private final Set<UUID> changed = new HashSet<>();
+    private final Map<UUID, Long> bites = new HashMap<>();
 
     public Angling(AngelkoenigPlugin pl) {
         this.pl = pl;
@@ -118,6 +119,18 @@ public final class Angling {
         hook.setApplyLure(false);
         hook.setSkyInfluenced(false);
         hook.setRainInfluenced(true);
+    }
+
+    /** Ein Fisch hat angebissen: kurzer Hinweis in der Aktionsleiste (auch für Bedrock und bei lauter Umgebung). */
+    public void bite(Player p) {
+        bites.put(p.getUniqueId(), System.currentTimeMillis());
+        p.sendActionBar(Texts.text(pl.lang(p), "catch.bite"));
+    }
+
+    /** Für Tests: wie lange der letzte Biss her ist (Millisekunden, −1 = noch keiner). */
+    public long sinceBite(UUID uuid) {
+        Long t = bites.get(uuid);
+        return t == null ? -1 : System.currentTimeMillis() - t;
     }
 
     /** Für Tests: der nächste Fang dieser Person ist diese Art (optional mit Länge). */
@@ -403,6 +416,7 @@ public final class Angling {
     }
 
     public void forget(UUID uuid) {
+        bites.remove(uuid);
         forced.remove(uuid);
         forcedCm.remove(uuid);
     }

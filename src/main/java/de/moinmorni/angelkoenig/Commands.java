@@ -2,14 +2,19 @@ package de.moinmorni.angelkoenig;
 
 import de.moinmorni.angelkoenig.data.PlayerData;
 import de.moinmorni.angelkoenig.data.Records;
+import de.moinmorni.angelkoenig.fish.Catch;
+import de.moinmorni.angelkoenig.fish.CatchRules;
 import de.moinmorni.angelkoenig.fish.DayTime;
 import de.moinmorni.angelkoenig.fish.Quest;
 import de.moinmorni.angelkoenig.fish.Species;
 import de.moinmorni.angelkoenig.fish.Tournament;
 import de.moinmorni.angelkoenig.fish.Units;
 import de.moinmorni.angelkoenig.fish.Weather;
+import de.moinmorni.angelkoenig.play.Angling;
+import de.moinmorni.angelkoenig.play.FishItems;
 import de.moinmorni.angelkoenig.play.Menus;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,6 +29,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 /** Spieler-Befehle (Fischbuch, Aufgaben, Wegweiser …) und /angeladmin zum Verwalten und Testen. */
 public final class Commands implements TabExecutor {
@@ -266,6 +272,51 @@ public final class Commands implements TabExecutor {
                 pl.store().save(d);
                 s.sendMessage(Texts.text(lang, "admin.done"));
             }
+            case "fisch" -> {
+                // Ein Fang wie frisch gefangen in den Korb (für Bilder und Tests); zählt nicht fürs Fischbuch
+                Player p = a.length > 2 ? Bukkit.getPlayerExact(a[1]) : null;
+                Optional<Species> sp = a.length > 2 ? Species.byId(a[2]) : Optional.empty();
+                if (p == null || sp.isEmpty()) {
+                    s.sendMessage(Texts.text(lang, "admin.usage"));
+                    return;
+                }
+                Catch c = CatchRules.sized(sp.get(), centimetres(a, 3, sp.get().meanCm()), 1.0);
+                ItemStack item = FishItems.create(c, pl.angling().spotAt(p.getLocation()), pl.angling().time(),
+                        Angling.today(), p.getName(), pl.lang(p));
+                for (ItemStack rest : p.getInventory().addItem(item).values()) {
+                    p.getWorld().dropItem(p.getLocation(), rest).setOwner(p.getUniqueId());
+                }
+                s.sendMessage(Texts.text(lang, "admin.done"));
+            }
+            case "fischbuch" -> {
+                // alle | leer | <art> [cm]: Fischbuch füllen oder leeren (für Bilder und Tests)
+                Player p = a.length > 2 ? Bukkit.getPlayerExact(a[1]) : null;
+                if (p == null) {
+                    s.sendMessage(Texts.text(lang, "admin.usage"));
+                    return;
+                }
+                PlayerData d = pl.data(p);
+                LocalDate today = Angling.today();
+                String what = a[2].toLowerCase(Locale.ROOT);
+                if (what.equals("leer") || what.equals("clear")) {
+                    d.resetBook();
+                } else if (what.equals("alle") || what.equals("all")) {
+                    for (Species sp : Species.values()) {
+                        if (!d.knows(sp)) {
+                            d.addCatch(CatchRules.sized(sp, sp.meanCm(), 1.0), today);
+                        }
+                    }
+                } else {
+                    Optional<Species> sp = Species.byId(what);
+                    if (sp.isEmpty()) {
+                        s.sendMessage(Texts.text(lang, "admin.usage"));
+                        return;
+                    }
+                    d.addCatch(CatchRules.sized(sp.get(), centimetres(a, 3, sp.get().meanCm()), 1.0), today);
+                }
+                pl.store().save(d);
+                s.sendMessage(Texts.text(lang, "admin.done"));
+            }
             case "melden" -> {
                 pl.angling().flushAll();
                 pl.writeRecordsNow();
@@ -287,7 +338,22 @@ public final class Commands implements TabExecutor {
         }
     }
 
-    /** Maschinenlesbar für Tests: Turnier, Zeit, Wetter, je Spieler Taler, Fänge, Arten, Angel, Köder, Aufgaben. */
+    /** Länge in Zentimetern aus einem Argument (Komma oder Punkt), sonst der Vorgabewert. */
+    private static double centimetres(String[] a, int i, double fallback) {
+        if (a.length <= i) {
+            return fallback;
+        }
+        try {
+            return Double.parseDouble(a[i].replace(',', '.'));
+        } catch (NumberFormatException e) {
+            return fallback;
+        }
+    }
+
+    /**
+     * Maschinenlesbar für Tests: Turnier, Zeit, Wetter, je Spieler Taler, Fänge, Arten, Angel, Köder, Aufgaben, Ort
+     * und wie lange der letzte Biss her ist (ms, −1 = keiner).
+     */
     private String status() {
         Tournament t = pl.tournaments().state();
         StringBuilder sb = new StringBuilder();
@@ -309,7 +375,8 @@ public final class Commands implements TabExecutor {
                 sb.append(" a").append(i).append('=').append(qs.get(i).spec()).append('|').append(d.progress(i))
                         .append('|').append(d.done(i));
             }
-            sb.append(" ort=").append(pl.angling().spotAt(p.getLocation()).id());
+            sb.append(" ort=").append(pl.angling().spotAt(p.getLocation()).id())
+                    .append(" biss=").append(pl.angling().sinceBite(p.getUniqueId()));
         }
         return sb.toString();
     }
@@ -321,7 +388,7 @@ public final class Commands implements TabExecutor {
         if (name.equals("angeladmin")) {
             if (args.length == 1) {
                 options.addAll(List.of("info", "status", "turnier", "zeit", "wetter", "taler", "naechster", "aufgabe",
-                        "melden", "neubauen", "neuladen"));
+                        "fisch", "fischbuch", "melden", "neubauen", "neuladen"));
             } else if (args.length == 2) {
                 switch (args[0].toLowerCase(Locale.ROOT)) {
                     case "turnier" -> options.addAll(List.of("start", "ende", "stopp"));
@@ -329,7 +396,10 @@ public final class Commands implements TabExecutor {
                     case "wetter" -> Arrays.stream(Weather.values()).forEach(w -> options.add(w.id()));
                     default -> Bukkit.getOnlinePlayers().forEach(p -> options.add(p.getName()));
                 }
-            } else if (args.length == 3 && args[0].equalsIgnoreCase("naechster")) {
+            } else if (args.length == 3 && (args[0].equalsIgnoreCase("naechster") || args[0].equalsIgnoreCase("fisch"))) {
+                Arrays.stream(Species.values()).forEach(sp -> options.add(sp.id()));
+            } else if (args.length == 3 && args[0].equalsIgnoreCase("fischbuch")) {
+                options.addAll(List.of("alle", "leer"));
                 Arrays.stream(Species.values()).forEach(sp -> options.add(sp.id()));
             }
         } else if (name.equals("top") && args.length == 1) {
