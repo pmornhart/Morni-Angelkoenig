@@ -251,15 +251,24 @@ public final class WorldSetup implements Listener {
         stamp.save(stampFile.toFile());
     }
 
-    /** Chunks um Dorf und Fangplätze bleiben geladen (Figuren, Boote, Tafeln). */
-    public void keepLoaded() {
+    /**
+     * Chunks um Dorf und Fangplätze bleiben geladen (Figuren, Boote, Tafeln). Geladen wird im Hintergrund;
+     * {@code done} läuft auf dem Hauptthread, sobald alle da sind.
+     */
+    public void keepLoaded(Runnable done) {
         int[][] areas = {{-32, -72, 40, 0}, {-112, -16, -88, 8}, {64, -8, 96, 16}, {56, 88, 96, 112}};
+        List<java.util.concurrent.CompletableFuture<org.bukkit.Chunk>> all = new ArrayList<>();
         for (int[] a : areas) {
             for (int cx = a[0] >> 4; cx <= a[2] >> 4; cx++) {
                 for (int cz = a[1] >> 4; cz <= a[3] >> 4; cz++) {
-                    world.getChunkAt(cx, cz).addPluginChunkTicket(plugin);
+                    all.add(world.getChunkAtAsync(cx, cz).thenApply(c -> {
+                        c.addPluginChunkTicket(plugin);
+                        return c;
+                    }));
                 }
             }
         }
+        java.util.concurrent.CompletableFuture.allOf(all.toArray(new java.util.concurrent.CompletableFuture[0]))
+                .whenComplete((v, e) -> Bukkit.getScheduler().runTask(plugin, done));
     }
 }

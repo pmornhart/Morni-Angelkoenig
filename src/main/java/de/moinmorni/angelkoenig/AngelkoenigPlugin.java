@@ -96,7 +96,6 @@ public final class AngelkoenigPlugin extends JavaPlugin {
             throw new IllegalStateException("Das Tal ließ sich nicht anlegen", e);
         }
         world = worldSetup.world();
-        worldSetup.keepLoaded();
         angling = new Angling(this);
         tournaments = new Tournaments(this);
         boards = new Boards(this);
@@ -120,8 +119,6 @@ public final class AngelkoenigPlugin extends JavaPlugin {
             }
         }
 
-        npcs.spawn();
-        boards.spawn();
         ambience.setWeather(de.moinmorni.angelkoenig.fish.Weather.KLAR, settings.weatherMin());
 
         var scheduler = getServer().getScheduler();
@@ -136,6 +133,9 @@ public final class AngelkoenigPlugin extends JavaPlugin {
         scheduler.runTaskTimer(this, ambience::pulse, 10L, 10L);
         scheduler.runTaskTimer(this, this::checkLanguages, 40L, 40L);
         scheduler.runTaskTimer(this, () -> {
+            if (!ready) {
+                return;
+            }
             boards.spawn();
             boards.refreshSpots();
             npcs.tick();
@@ -157,10 +157,14 @@ public final class AngelkoenigPlugin extends JavaPlugin {
         for (Player p : getServer().getOnlinePlayers()) {
             welcome(p);
         }
-        ready = true;
-        stateChanged();
-        getLogger().info("Angelkönig ist bereit: " + Species.fishes().size() + " Fischarten an "
-                + Layout.SPOTS.size() + " Fangplätzen.");
+        worldSetup.keepLoaded(() -> {
+            npcs.spawn();
+            boards.spawn();
+            ready = true;
+            stateChanged();
+            getLogger().info("Angelkönig ist bereit: " + Species.fishes().size() + " Fischarten an "
+                    + Layout.SPOTS.size() + " Fangplätzen.");
+        });
     }
 
     @Override
@@ -303,6 +307,11 @@ public final class AngelkoenigPlugin extends JavaPlugin {
     public void saveRecords() {
         recordsDirty = true;
         boards.refreshRecords();
+    }
+
+    /** Bestenliste sofort speichern (Verwaltung). */
+    public void writeRecordsNow() {
+        writeRecords();
     }
 
     private void writeRecords() {

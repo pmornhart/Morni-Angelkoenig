@@ -268,6 +268,7 @@ public final class Commands implements TabExecutor {
             }
             case "melden" -> {
                 pl.angling().flushAll();
+                pl.writeRecordsNow();
                 s.sendMessage(Texts.text(lang, "admin.done"));
             }
             case "neubauen" -> {

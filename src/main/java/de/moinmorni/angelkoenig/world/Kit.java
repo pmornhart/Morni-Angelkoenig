@@ -255,6 +255,11 @@ final class Kit {
         p.reserve(x1 - 2, z1 - 2, x2 + 2, z2 + 2);
     }
 
+    /** Vollblock zu einem Holz (bei Ziegeln „bricks“). */
+    static String planks(String wood) {
+        return "brick".equals(wood) ? "bricks" : wood + "_planks";
+    }
+
     /** Satteldach mit Überstand; First in z-Richtung ({@code ridgeAlongZ}) oder x-Richtung. */
     static void roof(Plan p, int x1, int z1, int x2, int z2, int y, boolean ridgeAlongZ, String wood) {
         if (ridgeAlongZ) {
@@ -274,7 +279,7 @@ final class Kit {
                     p.set(right, ly, z, stairs(wood, "west", false));
                     if (z == z1 || z == z2) {
                         for (int x = left + 1; x < right; x++) {
-                            p.set(x, ly, z, wood + "_planks");
+                            p.set(x, ly, z, planks(wood));
                         }
                     }
                 }
@@ -296,7 +301,7 @@ final class Kit {
                     p.set(x, ly, back, stairs(wood, "north", false));
                     if (x == x1 || x == x2) {
                         for (int z = front + 1; z < back; z++) {
-                            p.set(x, ly, z, wood + "_planks");
+                            p.set(x, ly, z, planks(wood));
                         }
                     }
                 }

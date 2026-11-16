@@ -202,8 +202,14 @@ class TerrainTest {
             int i = s.indexOf('[');
             all.add(i < 0 ? s : s.substring(0, i));
         }
+        Set<String> woods = Set.of("oak", "spruce", "birch", "jungle", "acacia", "dark_oak", "mangrove", "cherry",
+                "bamboo", "crimson", "warped", "pale_oak");
         for (String m : all) {
             assertFalse(old.contains(m), "alter Blockname: " + m);
+            if (m.endsWith("_planks") || m.endsWith("_log") && !m.startsWith("stripped_")) {
+                String wood = m.substring(0, m.lastIndexOf('_'));
+                assertTrue(woods.contains(wood), "kein Holz: " + m);
+            }
         }
     }
 
