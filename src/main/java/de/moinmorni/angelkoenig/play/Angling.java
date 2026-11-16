@@ -53,6 +53,8 @@ public final class Angling {
     private static final int TICKS = 20;
     private static final int LURE_MIN = 20;
     private static final int LURE_MAX = 60;
+    /** Belohnung, wenn alle Arten im Fischbuch stehen. */
+    static final int BOOK_COMPLETE = 1000;
 
     private final AngelkoenigPlugin pl;
     private final SplittableRandom random = new SplittableRandom();
@@ -164,6 +166,14 @@ public final class Angling {
         }
         boolean first = !d.knows(c.species());
         boolean personal = d.addCatch(c, today);
+        if (first && !c.species().junk()) {
+            d.earn(c.species().rarity().firstBonus());
+            if (d.speciesCount() == Species.fishes().size()) {
+                d.earn(BOOK_COMPLETE);
+                p.sendMessage(Texts.msg(lang, "catch.book-done", Placeholder.unparsed("n", String.valueOf(BOOK_COMPLETE))));
+                celebrate(p.getLocation());
+            }
+        }
         boolean record = !c.species().junk() && pl.records().offer(uuid, p.getName(), c, today.toEpochDay());
         pl.records().totals(uuid, p.getName(), d.catches(), d.tournamentsWon(), d.legendary());
         announce(p, lang, c, first, personal && !first, record);
@@ -217,9 +227,9 @@ public final class Angling {
             p.sendMessage(Texts.msg(lang, "catch.bottle", Placeholder.unparsed("note",
                     Texts.plain(lang, "bottle." + random.nextInt(5)))));
         }
-        if (first) {
-            p.sendMessage(Texts.msg(lang, "catch.first"));
-        } else if (personal) {
+        if (first && !s.junk()) {
+            p.sendMessage(Texts.msg(lang, "catch.first", Placeholder.unparsed("n", String.valueOf(s.rarity().firstBonus()))));
+        } else if (personal && !first) {
             p.sendMessage(Texts.msg(lang, "catch.record"));
         }
         if (record && !first) {
@@ -246,6 +256,8 @@ public final class Angling {
             Ui.sound(p, "block.note_block.chime", r == Rarity.EPIC ? 1.4f : 1.1f);
             p.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, p.getLocation().add(0, 1.2, 0), 12, 0.4, 0.5, 0.4);
         } else {
+            p.getWorld().spawnParticle(Particle.SPLASH, p.getLocation().add(p.getLocation().getDirection().multiply(2))
+                    .add(0, 0.5, 0), 25, 0.4, 0.2, 0.4, 0.2);
             p.sendActionBar(Texts.text(lang, "catch.bar", colour, Placeholder.unparsed("fish", fish),
                     Placeholder.unparsed("size", size)));
             Ui.sound(p, "entity.experience_orb.pickup", s.junk() ? 0.7f : 1.2f);

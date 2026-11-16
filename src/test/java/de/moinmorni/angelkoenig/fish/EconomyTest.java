@@ -74,6 +74,10 @@ class EconomyTest {
             }
         }
         assertEquals(0, Rod.HASEL.price(), "Haselrute hat jeder");
+        for (int i = 2; i < Rarity.values().length; i++) {
+            assertTrue(Rarity.values()[i].firstBonus() > Rarity.values()[i - 1].firstBonus(), "seltener = mehr Bonus");
+        }
+        assertEquals(0, Rarity.JUNK.firstBonus());
     }
 
     @Test

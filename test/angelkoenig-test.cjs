@@ -284,9 +284,9 @@ async function main() {
   f = fishes(anna).find((i) => plain(i.customName) === 'Seesaibling');
   check('Seesaibling mit 40,0 cm (Fang festgelegt)', ok && f && lore(f).includes('40,0 cm'), f && lore(f));
   check('Seltener Fang: Titel', anna.titles.some((t) => t.includes('Seesaibling')), anna.titles.join(','));
-  check('Neu im Fischbuch', sees(anna, /Neu im Fischbuch/));
+  check('Neu im Fischbuch mit Bonus (+30 Taler für einen seltenen Fisch)', sees(anna, /Neu im Fischbuch! \+30 Taler/), anna.chats.filter((c) => /Fischbuch/.test(c)).join(' | '));
   s = await status();
-  check('Aufgabe „2 Fische am Bergsee“ erledigt: +40 Taler', s.players.Anna.a[0].done && s.players.Anna.taler === 65
+  check('Aufgabe „2 Fische am Bergsee“ erledigt: 25 + 5 + 30 (Fischbuch) + 40 = 100 Taler', s.players.Anna.a[0].done && s.players.Anna.taler === 100
     && sees(anna, /Aufgabe erledigt/), JSON.stringify(s.players.Anna));
 
   // ------------------------------------------------------------------ Bert am Gebirgsbach (englisch)

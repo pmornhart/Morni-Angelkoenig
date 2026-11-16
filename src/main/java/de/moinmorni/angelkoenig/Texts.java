@@ -235,7 +235,9 @@ public final class Texts {
         t("catch.msg", "Du hast <c><fish></c> gefangen! <gray>(<size>)</gray>", "You caught <c><fish></c>! <gray>(<size>)</gray>");
         t("catch.find", "Du hast <c><fish></c> herausgezogen. <gray>(<size>)</gray>", "You pulled out <c><fish></c>. <gray>(<size>)</gray>");
         t("catch.size", "<len> · <weight>", "<len> · <weight>");
-        t("catch.first", "<em>Neu im Fischbuch!</em>", "<em>New in your fish book!</em>");
+        t("catch.first", "<em>Neu im Fischbuch!</em> <au>+<n> Taler</au>", "<em>New in your fish book!</em> <au>+<n> thaler</au>");
+        t("catch.book-done", "<au>\u2726 Fischbuch vollständig!</au> <gray>Alle Arten des Tals gefangen –</gray> <au>+<n> Taler</au><gray>!</gray>",
+                "<au>\u2726 Fish book complete!</au> <gray>Every species in the valley caught –</gray> <au>+<n> thaler</au><gray>!</gray>");
         t("catch.record", "<au>Dein bisher größter Fang dieser Art!</au>", "<au>Your biggest catch of this kind so far!</au>");
         t("catch.world-record", "<au>✦ Talrekord!</au> <gray>Kein Fang dieser Art war je schwerer.</gray>",
                 "<au>✦ Valley record!</au> <gray>No catch of this kind was ever heavier.</gray>");

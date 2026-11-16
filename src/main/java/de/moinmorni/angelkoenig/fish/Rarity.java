@@ -45,6 +45,18 @@ public enum Rarity {
         return luckBonus;
     }
 
+    /** Belohnung für den ersten Fang einer Art (neu im Fischbuch), in Talern. */
+    public int firstBonus() {
+        return switch (this) {
+            case JUNK -> 0;
+            case COMMON -> 5;
+            case UNCOMMON -> 12;
+            case RARE -> 30;
+            case EPIC -> 75;
+            case LEGENDARY -> 200;
+        };
+    }
+
     /** Mindestens so selten wie {@code other}? Krempel zählt nie. */
     public boolean atLeast(Rarity other) {
         return this != JUNK && ordinal() >= other.ordinal();

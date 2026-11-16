@@ -79,6 +79,7 @@ public final class Surface {
     private final short andesite;
     private final short tuff;
     private final short stone;
+    private final short calcite;
     private final short dirtPath;
     private final short rooted;
     private final short bedrock;
@@ -123,6 +124,7 @@ public final class Surface {
         andesite = pal.id("andesite");
         tuff = pal.id("tuff");
         stone = pal.id("stone");
+        calcite = pal.id("calcite");
         dirtPath = pal.id("dirt_path");
         rooted = pal.id("rooted_dirt");
         bedrock = pal.id("bedrock");
@@ -330,7 +332,10 @@ public final class Surface {
             if (top >= 138 && slope <= 2 && r < 60) {
                 return snowBlock;
             }
-            return r < 45 ? stone : r < 65 ? andesite : r < 75 ? tuff : r < 82 ? cobble : r < 90 ? gravel : stone;
+            if (top < 104 && slope <= 4 && r < 18) {
+                return r < 9 ? mossyCobble : moss;
+            }
+            return rock(x, top, z);
         }
         boolean wetNear = waterNear(cols, lx, lz);
         if (t.inMoor(x, z) && top <= 65) {
@@ -360,8 +365,8 @@ public final class Surface {
     }
 
     private short sub(short top, int x, int y, int z) {
-        if (top == snowBlock || top == stone || top == andesite || top == tuff || top == cobble) {
-            return y % 2 == 0 ? stone : andesite;
+        if (top == snowBlock || top == stone || top == andesite || top == tuff || top == cobble || top == calcite) {
+            return rock(x, y, z);
         }
         if (top == mud || top == moss) {
             return mud;
@@ -375,9 +380,20 @@ public final class Surface {
         return r100(x, y, z, 67) < 8 ? rooted : dirt;
     }
 
+    /** Fels: grauer Kalk mit Flecken – größere Felder statt Einzelblock-Rauschen, oben heller (Kalkstein). */
     private short rock(int x, int y, int z) {
+        double patch = Noise.value(x / 5.0 + y / 9.0, z / 5.0 - y / 11.0, 87);
         int r = r100(x, y, z, 68);
-        return r < 62 ? stone : r < 80 ? andesite : r < 92 ? tuff : gravel;
+        if (y >= 105 && patch > 0.72) {
+            return r < 70 ? calcite : stone;
+        }
+        if (patch < 0.22) {
+            return r < 75 ? andesite : stone;
+        }
+        if (patch > 0.85) {
+            return r < 60 ? tuff : stone;
+        }
+        return r < 86 ? stone : r < 93 ? andesite : r < 97 ? cobble : gravel;
     }
 
     private void decor(Chunk out, int lx, int lz, int x, int z, int top, short topBlock, Terrain.Column[][] cols) {

@@ -74,8 +74,7 @@ public final class Valley {
                 }
                 p.set(x, G, z, "polished_andesite");
                 if (d > 2.2) {
-                    p.set(x, S, z, "stone_bricks");
-                    p.set(x, S + 1, z, "stone_brick_slab[type=bottom]");
+                    p.set(x, S, z, "polished_andesite");
                 } else {
                     p.set(x, S, z, "water");
                 }
