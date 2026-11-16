@@ -1,0 +1,52 @@
+name: MorniAngelkoenig
+version: '${project.version}'
+main: de.moinmorni.angelkoenig.AngelkoenigPlugin
+api-version: '1.21'
+description: Angelkönig für das MoinMorni-Netzwerk – gemütlich angeln im Alpen-Tal, mit Fischbuch, Aufgaben und Turnieren.
+authors: [MoinMorni]
+website: https://moinmorni.net
+# Läuft mit dem Netzwerk-Plugin (Sprache, Party, Statistik) und auch allein.
+softdepend: [MoinMorni]
+
+commands:
+  angeladmin:
+    description: Verwaltung und Tests (info, status, turnier, zeit, wetter, taler, naechster, aufgabe, melden, neubauen, neuladen)
+    usage: /angeladmin <info|status|turnier|zeit|wetter|taler|naechster|aufgabe|melden|neubauen|neuladen>
+    permission: moinmorni.angelkoenig.admin
+  fischbuch:
+    description: Dein Fischbuch (Sammlung, Rekorde, Werte)
+    usage: /fischbuch
+    aliases: [fishbook, fb]
+  aufgaben:
+    description: Aufgaben des Tages
+    usage: /aufgaben
+    aliases: [quests, tasks]
+  wegweiser:
+    description: Zu den Fangplätzen reisen
+    usage: /wegweiser
+    aliases: [spots, plaetze, warp]
+  koeder:
+    description: Köder einhängen oder aushängen
+    usage: /koeder
+    aliases: [bait]
+  kleiderschrank:
+    description: Kleidung anziehen
+    usage: /kleiderschrank
+    aliases: [wardrobe, garderobe]
+  turnier:
+    description: Wann ist das nächste Angel-Turnier?
+    usage: /turnier
+    aliases: [contest, tournament]
+  stats:
+    description: Statistik ansehen
+    usage: /stats [spieler]
+    aliases: [statistik]
+  top:
+    description: Bestenlisten (meiste Fänge, Turniersiege, größte Fänge)
+    usage: /top [faenge|turniere|rekorde]
+    aliases: [bestenliste, leaderboard]
+
+permissions:
+  moinmorni.angelkoenig.admin:
+    description: Angelkönig verwalten und im Kreativmodus im Tal bauen
+    default: op
