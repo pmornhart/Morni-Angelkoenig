@@ -1,6 +1,6 @@
 # Morni Angelkönig
 
-Der Angel-Modus des Minecraft-Netzwerks **MoinMorni** (moinmorni.net): **Gemütlich angeln im Alpen-Tal** – jederzeit
+Der Angel-Modus des Minecraft-Netzwerks **morni.net**: **Gemütlich angeln im Alpen-Tal** – jederzeit
 betretbar, ohne Runden. Eigene Fische der Alpen, vier Fangplätze, Fischhändler, Fischbuch, Aufgaben des Tages und
 alle 15 Minuten ein Angel-Turnier. Ein Paper-Plugin für Paper 26.x (Java 25). Es läuft im Netzwerk und auch ganz allein.
 
@@ -54,14 +54,14 @@ Königskrone (nur für Turniersieger).
 | `/fischbuch` · `/aufgaben` · `/wegweiser` · `/koeder` · `/kleiderschrank` | dieselben Fenster wie in der Schnellleiste |
 | `/turnier` | wann das nächste Turnier ist |
 | `/stats [spieler]` · `/top [faenge\|turniere\|rekorde]` | Statistik und Bestenlisten |
-| `/angeladmin info\|status\|turnier start\|ende\|stopp\|zeit …\|wetter …\|taler …\|naechster …\|fisch …\|fischbuch …\|aufgabe …\|melden\|neubauen\|neuladen` | Verwaltung und Tests (`moinmorni.angelkoenig.admin`); `fisch <spieler> <art> [cm]` legt einen Fang in den Korb, `fischbuch <spieler> alle\|leer\|<art>` füllt oder leert das Fischbuch (für Bilder) |
+| `/angeladmin info\|status\|turnier start\|ende\|stopp\|zeit …\|wetter …\|taler …\|naechster …\|fisch …\|fischbuch …\|aufgabe …\|melden\|neubauen\|neuladen` | Verwaltung und Tests (`morninet.angelkoenig.admin`); `fisch <spieler> <art> [cm]` legt einen Fang in den Korb, `fischbuch <spieler> alle\|leer\|<art>` füllt oder leert das Fischbuch (für Bilder) |
 
 Einstellungen stehen in der `config.yml` (Tageszeit, Wetter, Biss-Zeiten, Startgeld, Turnier an/aus, Abstand, Dauer,
 Preise).
 
 ## Im Netzwerk
 
-Mit dem Netzwerk-Plugin („MoinMorni“, Schnittstelle `de.moinmorni.api.MoinMorni`): Sprache, Party (wer später kommt,
+Mit dem Netzwerk-Plugin („MorniNet“, Schnittstelle `net.morni.api.MorniNet`): Sprache, Party (wer später kommt,
 landet bei seiner Party), Statistik, Zustand und zurück zur Lobby. Ohne Netzwerk: deutsche Texte, Statistik nur lokal.
 
 - Statistik (`stats("angelkoenig", …)`): hochgezählt `catches`, `legendary`, `tournaments_won`; Bestwerte

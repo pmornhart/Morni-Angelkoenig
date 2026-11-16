@@ -7,7 +7,7 @@
 #   KEEP=1 SKIP_TEST=1 test/run.sh    # nur Server starten
 #   FRESH=1 test/run.sh               # Welt vorher löschen (entsteht neu aus dem Code)
 #
-# Erwartet (Vorgaben für die MoinMorni-Sandbox, alles per Umgebungsvariable änderbar):
+# Erwartet (Vorgaben für die Sandbox von morni.net, alles per Umgebungsvariable änderbar):
 #   ANGEL_JAVA    Java 25 (Ordner; sonst die JDK 25 aus dem Cache, sonst JAVA_HOME)
 #   PAPER_JAR     Paper 26.1.2 (mineflayer kann bis 26.1)
 #   TEMPLATE      ein schon einmal gestarteter Paper-26.1.2-Ordner (libraries/, cache/, versions/ werden kopiert,
@@ -39,7 +39,7 @@ echo "== Bauen"
 (cd "$REPO" && nice -n 15 mvn -q -B -f test/fake-network/pom.xml package)
 
 echo "== Server einrichten: $SERVER"
-mkdir -p "$SERVER/plugins/MorniAngelkoenig" "$SERVER/plugins/MoinMorni"
+mkdir -p "$SERVER/plugins/MorniAngelkoenig" "$SERVER/plugins/MorniNet"
 if [ -d "$TEMPLATE" ] && [ ! -d "$SERVER/libraries" ]; then
   cp -r "$TEMPLATE/libraries" "$TEMPLATE/cache" "$TEMPLATE/versions" "$SERVER/" 2>/dev/null || true
 fi
@@ -90,11 +90,11 @@ turnier:
   teilnahme: 15
 EOF
 # Test-Netzwerk: Bert spricht Englisch, Anna und Carl sind eine Party (Anna führt).
-cat > "$SERVER/plugins/MoinMorni/fake.properties" <<'EOF'
+cat > "$SERVER/plugins/MorniNet/fake.properties" <<'EOF'
 lang.Bert=en
 party.Anna=Anna,Carl
 EOF
-rm -f "$SERVER/plugins/MoinMorni/calls.log"
+rm -f "$SERVER/plugins/MorniNet/calls.log"
 rm -rf "$SERVER/plugins/MorniAngelkoenig/spieler" "$SERVER/plugins/MorniAngelkoenig/bestenliste.yml"
 rm -rf "$SERVER/world/playerdata" "$SERVER/world/players" 2>/dev/null || true
 find "$SERVER" -maxdepth 3 -type d -name playerdata -path '*world*' -exec rm -rf {} + 2>/dev/null || true
@@ -102,7 +102,9 @@ if [ "${FRESH:-0}" = "1" ]; then
   rm -rf "$SERVER/angelkoenig" "$SERVER/plugins/MorniAngelkoenig/welt.yml"
 fi
 cp "$REPO/target/Morni-Angelkoenig.jar" "$SERVER/plugins/"
-cp "$REPO/test/fake-network/target/MoinMorni-FakeNetwork.jar" "$SERVER/plugins/"
+# nur ein Test-Netzwerk im Server (auch keine ältere Fassung unter anderem Namen)
+rm -f "$SERVER"/plugins/*-FakeNetwork.jar
+cp "$REPO/test/fake-network/target/MorniNet-FakeNetwork.jar" "$SERVER/plugins/"
 for jar in ${EXTRA_PLUGINS:-}; do
   cp "$jar" "$SERVER/plugins/"
 done

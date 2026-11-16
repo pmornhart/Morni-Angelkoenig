@@ -18,10 +18,10 @@
   und Spielen): nur die Spielidee „gemütlich angeln, sammeln, verkaufen“, eigene Fische, eigene Namen, eigene Welt.
   Nur Minecraft-Gegenstände und -Blöcke, keine eigenen Texturen.
 - **Nichts für echtes Geld**: Taler gibt es nur im Spiel (Fänge verkaufen, Aufgaben, Turniere).
-- Die Netzwerk-Schnittstelle `src/api/java/de/moinmorni/api/MoinMorni.java` ist eine Kopie aus `pmornhart/moinmorni.net`
-  (`plugins/moinmorni-network/src/main/java/de/moinmorni/api/MoinMorni.java`) und muss **genau gleich** bleiben. Sie wird
+- Die Netzwerk-Schnittstelle `src/api/java/net/morni/api/MorniNet.java` ist eine Kopie aus `pmornhart/morni.net`
+  (`plugins/morninet-network/src/main/java/net/morni/api/MorniNet.java`) und muss **genau gleich** bleiben. Sie wird
   nur mitübersetzt und kommt **nicht** in die Jar. Nur `net/Connected` darf sie benutzen.
-- Angelkönig muss auch ohne Netzwerk laufen (`softdepend: [MoinMorni]`).
+- Angelkönig muss auch ohne Netzwerk laufen (`softdepend: [MorniNet]`).
 - Paper 26.x, Java 25. Der Code muss auch gegen Paper 26.1 übersetzen (`mvn -Ppaper-26.1 compile`, läuft in der CI).
   Blocknamen von 26.x benutzen (z. B. `iron_chain`, nicht `chain`; `short_grass`, nicht `grass`).
 - Regeln, die sich ohne Server prüfen lassen (Fische, Fangtabellen, Größen, Preise, Köder, Angeln, Aufgaben, Turnier,
