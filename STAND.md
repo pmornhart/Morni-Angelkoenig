@@ -29,7 +29,7 @@ Kennung im Netzwerk `angelkoenig`, englisch „Angler King“.
 - 47 Unit-Tests grün (Fangtabellen, Köder, Angeln, Größen, Preise, Aufgaben, Turnier, Wetter, Tageszeit, Spielerdaten,
   Bestenliste, Texte; Gelände: alle Gewässer dicht, Fangplätze stehen vor ihrem Wasser, Wege begehbar, keine alten
   Blocknamen). Übersetzt gegen Paper-API 26.3 und 26.1.
-- Echter Test (`test/run.sh`, Paper 26.1.2, drei Test-Spieler): **78/78**, Server-Log ohne Fehler – Ankunft,
+- Echter Test (`test/run.sh`, Paper 26.1.2, drei Test-Spieler): **83/83**, Server-Log ohne Fehler – Ankunft,
   Schnellleiste, Englisch, Wegweiser, echtes Angeln an allen vier Plätzen (Bergsee, Bach, Moor, Eisloch),
   Fang-Gegenstand mit Name/Länge/Gewicht/Ort/Wert, Legende mit Ansage für alle, Fischbuch mit Bonus, Aufgabe erledigt,
   Fischhändler (einzeln und alles verkaufen, Angel und Köder kaufen, zu teuer), Köder wird verbraucht, Sitzen und
