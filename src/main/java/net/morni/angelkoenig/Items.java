@@ -2,6 +2,7 @@ package net.morni.angelkoenig;
 
 import java.util.List;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemFlag;
@@ -39,7 +40,8 @@ public final class Items {
                 meta.displayName(name);
             }
             if (lore != null && !lore.isEmpty()) {
-                meta.lore(lore);
+                // Zeilen ohne eigene Farbe grau (Minecraft malt sie sonst lila)
+                meta.lore(lore.stream().map(l -> l.colorIfAbsent(NamedTextColor.GRAY)).toList());
             }
             meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_DYE, ItemFlag.HIDE_UNBREAKABLE,
                     ItemFlag.HIDE_ADDITIONAL_TOOLTIP);

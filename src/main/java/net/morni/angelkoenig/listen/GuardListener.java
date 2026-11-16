@@ -1,5 +1,6 @@
 package net.morni.angelkoenig.listen;
 
+import com.destroystokyo.paper.event.player.PlayerAdvancementCriterionGrantEvent;
 import net.morni.angelkoenig.AngelkoenigPlugin;
 import java.util.Set;
 import org.bukkit.World;
@@ -53,6 +54,14 @@ public final class GuardListener implements Listener {
     /** Im Tal wird nicht gekocht: keine „Rezept freigeschaltet“-Hinweise, wenn ein Fisch im Korb landet. */
     @EventHandler(ignoreCancelled = true)
     public void onRecipe(PlayerRecipeDiscoverEvent e) {
+        if (ours(e.getPlayer().getWorld())) {
+            e.setCancelled(true);
+        }
+    }
+
+    /** Keine Minecraft-Fortschritte im Tal (z. B. „Anglerglück“ beim ersten Fang) – das Fischbuch zählt hier. */
+    @EventHandler(ignoreCancelled = true)
+    public void onAdvancement(PlayerAdvancementCriterionGrantEvent e) {
         if (ours(e.getPlayer().getWorld())) {
             e.setCancelled(true);
         }

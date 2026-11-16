@@ -389,7 +389,10 @@ async function main() {
   f = newest(anna);
   check('Fang am Moorweiher mit Köder (einer verbraucht)', ok && s.players.Anna.koeder === 'wurm:9'
     && /Moorweiher/.test(lore(f)), `${s.players.Anna.koeder} ${lore(f)}`);
-  check('Köder-Hinweis in der Aktionsleiste', anna.bars.some((b) => /Köder: Regenwurm/.test(b)), anna.bars.slice(-2).join(' | '));
+  check('Köderdose in der Schnellleiste zählt mit (Regenwurm ×9)', await waitFor(() => /Regenwurm ×9/.test(plain(slot(anna, 1)?.customName)), 3000),
+    plain(slot(anna, 1)?.customName));
+  check('Kein Köder-Hinweis in der Aktionsleiste, solange die Dose voll genug ist', !anna.bars.some((b) => /Köder: Regenwurm/.test(b)),
+    anna.bars.slice(-2).join(' | '));
   const carl = await join('Carl');
   check('Carl landet bei seiner Party (Anna am Moor)', await waitFor(() => near(carl.entity.position, anna.entity.position, 3),
     5000) && sees(carl, /Deine Party angelt schon hier/), JSON.stringify(carl.entity.position));

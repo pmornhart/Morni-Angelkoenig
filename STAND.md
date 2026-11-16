@@ -52,20 +52,23 @@ Kennung im Netzwerk `angelkoenig`, englisch „Angler King“.
   fleckig. Neubau 9 → 10 → 11 → 12 echt geprüft, Bild `~/mm-cache/bilder-angelkoenig/v3/05-see-blick.jpg`.
 - Biss-Hinweis „❗ Biss! Schnell einholen!“ in der Aktionsleiste; Verwaltung `/angeladmin fisch` (Fang in den Korb)
   und `/angeladmin fischbuch alle|leer|<art>` für Bilder und Tests; `status` meldet, wie lange der letzte Biss her ist.
-  Echter Test jetzt **82/82** (Wartezeiten im Test robuster gegen Last).
+  Echter Test (Wartezeiten im Test robuster gegen Last).
 - Angelsystem mit echtem Client 26.3 fotografiert (nur lokal, `~/mm-cache/bilder-angelkoenig/system/`): Fischbuch
   teilweise (mit „???“) und komplett, Beschreibung je Seltenheit und Fundstück, echter Fang mit Biss-Hinweis und
   Legenden-Titel, Fischhändler (Verkauf, Angeln, Köder, Kleidung), Köderdose, Kleiderschrank mit Königskrone, Aufgaben,
   Wegweiser, Turnier mit Leiste oben (Restzeit, Führender), Seitenleiste und Siegermeldung, Bestenlisten am Dorfplatz.
   Dabei verbessert: kürzere Fang-Nachricht, Feuerwerk nicht mehr vor dem Gesicht, Turnier-Titel überdeckt die Leiste
   nicht, Kleidung ohne Rüstungsleiste, lange Bestenliste nicht mehr unter dem Vordach, keine „Rezept freigeschaltet“-
-  Hinweise, „Verdient“ zählt alle Taler, Countdown über eine Stunde als „3:13:10“. Turnier-Automatik im laufenden Server
-  gesehen (zur Viertelstunde, mit nur einem Angler freundlich abgesagt).
+  Hinweise und keine Minecraft-Fortschritte („Anglerglück“) im Tal, „Verdient“ zählt alle Taler, Countdown über eine
+  Stunde als „3:13:10“, Beschreibungen in Menüs grau statt lila, wer eine Legende fängt, bekommt die Ansage für alle
+  nicht noch einmal, Köder-Hinweis in der Aktionsleiste nur noch, wenn die Dose fast leer ist (Anzahl steht an der
+  Köderdose und in der Leiste). Turnier-Automatik im laufenden Server gesehen: zur Viertelstunde Vorwarnung und Start
+  mit zwei Anglern.
 - **Umbenannt in morni.net** (16.11., Philip): Paket `net.morni.angelkoenig`, Schnittstelle `net.morni.api.MorniNet`
   (byte-gleich aus dem Netzwerk-Repo), `softdepend: [MorniNet]`, Recht `morninet.angelkoenig.admin`, Texte und Leiste
   „morni.net“, Test-Netzwerk `MorniNet` (`plugins/MorniNet/`). Plugin-Name, Datenordner (`plugins/MorniAngelkoenig/`)
   und Kennung `angelkoenig` bleiben – bestehende Fänge und Spielerdaten gelten weiter. Version bleibt 0.1.0 (noch nicht
-  veröffentlicht). Unit-Tests, `-Ppaper-26.1 compile` und echter Test **82/82** grün.
+  veröffentlicht). Unit-Tests, `-Ppaper-26.1 compile` und echter Test **83/83** grün.
 - Beobachtet (nicht geklärt): Einmal blieb im echten Client 26.3 (über ViaVersion an Paper 26.1.2) Regen sichtbar,
   obwohl das Tal laut Server klar war; nach neuem Einloggen weg. Wohl Wetter-Abgleich über Via, nicht das Plugin.
 - Funde behoben: Wegweiser-Platz am Bergsee warf den Schwimmer auf die Stegkante; Fänge landeten im Wasser statt im

@@ -53,6 +53,8 @@ public final class Angling {
     private static final int TICKS = 20;
     private static final int LURE_MIN = 20;
     private static final int LURE_MAX = 60;
+    /** Ab so wenigen Ködern sagt die Aktionsleiste Bescheid. */
+    private static final int BAIT_WARN = 3;
     /** So lange steht der Biss-Hinweis in der Aktionsleiste. */
     private static final long BITE_HINT_MS = 3000;
     /** Belohnung, wenn alle Arten im Fischbuch stehen. */
@@ -207,10 +209,14 @@ public final class Angling {
             p.sendMessage(Texts.msg(lang, "catch.full"));
         }
         if (used != null) {
+            // Wie viele Köder noch da sind, steht in der Leiste rechts; die Aktionsleiste meldet sich nur, wenn sie
+            // bald leer ist (sonst überdeckt sie die Fang-Nachricht im Chat)
             int left = d.baits(used);
-            p.sendActionBar(left > 0 ? Texts.text(lang, "catch.bait", Placeholder.unparsed("bait",
-                    Texts.plain(lang, "bait." + used.id())), Placeholder.unparsed("n", String.valueOf(left)))
-                    : Texts.text(lang, "catch.bait-empty"));
+            if (left <= BAIT_WARN) {
+                p.sendActionBar(left > 0 ? Texts.text(lang, "catch.bait", Placeholder.unparsed("bait",
+                        Texts.plain(lang, "bait." + used.id())), Placeholder.unparsed("n", String.valueOf(left)))
+                        : Texts.text(lang, "catch.bait-empty"));
+            }
             Hotbar.refreshBait(pl, p);
         }
         quests(p, Quest.Event.caught(c, spot, used != null));
@@ -271,6 +277,9 @@ public final class Angling {
             Ui.sound(p, "ui.toast.challenge_complete", 1.0f);
             celebrate(at);
             for (Player o : pl.world().getPlayers()) {
+                if (o.equals(p)) {
+                    continue; // wer selbst fängt, hat schon Titel und eigene Zeile
+                }
                 String ol = pl.lang(o);
                 o.sendMessage(Texts.msg(ol, "catch.legendary.all", Placeholder.unparsed("name", p.getName()),
                         Placeholder.unparsed("fish", Texts.plain(ol, "species." + s.id())),
