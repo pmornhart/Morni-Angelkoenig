@@ -73,7 +73,19 @@ public final class Terrain {
     }
 
     /** Ein Gipfel: Mitte, Höhe, Radius des Fußes. */
-    record Peak(double x, double z, double top, double radius) {
+    /**
+     * Ein Gipfel: Mitte, Höhe, Fuß-Radien (länglich, gedreht), Steilheit der Flanken und Stärke der Grate. So sieht
+     * jeder Berg anders aus – breite Stöcke, schlanke Hörner, lange Kämme.
+     */
+    record Peak(double x, double z, double top, double rx, double rz, double angle, double steep, double ridges) {
+
+        Peak(double x, double z, double top, double radius) {
+            this(x, z, top, radius, radius, 0, 1.15, 0.3);
+        }
+    }
+
+    /** Kar: eine Mulde in der Bergflanke (dort sammelt sich Schnee). */
+    record Cirque(double x, double z, double radius, double depth) {
     }
 
     /** Was in einer Säule steht. */
@@ -85,10 +97,21 @@ public final class Terrain {
     }
 
     private static final List<Peak> PEAKS = List.of(
-            new Peak(-62, 122, 196, 62), new Peak(14, 132, 214, 70), new Peak(96, 130, 184, 56),
-            new Peak(-150, 104, 178, 64), new Peak(-180, -14, 170, 62), new Peak(-52, -150, 156, 66),
-            new Peak(54, -142, 162, 62), new Peak(150, -110, 158, 60), new Peak(182, 24, 174, 64),
-            new Peak(166, 128, 182, 64));
+            // Süden, hinter dem See (Blick vom Dorf): breiter Stock, hohes Horn, langer Kamm
+            new Peak(-64, 124, 192, 70, 48, 0.4, 1.6, 0.45), new Peak(16, 136, 208, 74, 54, -0.3, 1.35, 0.55),
+            new Peak(98, 132, 182, 72, 40, 0.9, 1.9, 0.35),
+            // Vorgipfel davor
+            new Peak(-28, 104, 142, 34, 24, 0.2, 0.95, 0.5), new Peak(52, 108, 150, 32, 26, -0.6, 0.95, 0.6),
+            new Peak(-100, 98, 136, 32, 22, 1.1, 1.0, 0.4),
+            // Westen, Norden, Osten
+            new Peak(-152, 106, 180, 60, 44, -0.5, 1.4, 0.5), new Peak(-182, -16, 172, 52, 70, 0.2, 1.7, 0.4),
+            new Peak(-54, -152, 158, 74, 40, 0.1, 1.8, 0.35), new Peak(56, -144, 166, 50, 50, 0, 1.3, 0.5),
+            new Peak(10, -120, 128, 36, 26, 0.5, 1.0, 0.4), new Peak(152, -112, 160, 56, 46, 0.7, 1.5, 0.45),
+            new Peak(184, 22, 176, 48, 66, -0.2, 1.6, 0.4), new Peak(168, 130, 184, 62, 50, 0.3, 1.35, 0.5),
+            new Peak(-120, -100, 140, 38, 30, -0.8, 1.0, 0.45));
+
+    private static final List<Cirque> CIRQUES = List.of(new Cirque(-58, 104, 20, 26), new Cirque(10, 112, 22, 30),
+            new Cirque(-146, 86, 18, 22), new Cirque(50, -122, 18, 20), new Cirque(150, -92, 16, 18));
 
     private final List<Carve> carves = new ArrayList<>();
     private final List<Carve> late = new ArrayList<>();
@@ -135,11 +158,11 @@ public final class Terrain {
         }
 
         // ---------- Gewässer (das erste, das eine Stelle enthält, gilt) ----------
-        waters.add(new Water("oberbach", new Shape.ClipWest(line(2.0, new double[] {-111, 1.5},
+        waters.add(new Water("oberbach", new Shape.ClipWest(line(2.3, new double[] {-111, 2.0},
                 new double[] {-122, -1}, new double[] {-136, -7}, new double[] {-150, -13}), -110.5),
                 Layout.UPPER_WATER_Y, 2, 1.2, Spot.BACH, false, Bed.STREAM));
         waters.add(new Water("gumpe", new Shape.Union(List.of(new Shape.Ellipse(-100, 2, 10, 8, 0.06, 5),
-                blocks(Layout.FALL_X, Layout.FALL_Z1, -105, Layout.FALL_Z2))), Layout.WATER_Y, 5, 0.7, Spot.BACH,
+                blocks(Layout.FALL_X + 1, Layout.FALL_Z1, -105, Layout.FALL_Z2))), Layout.WATER_Y, 5, 0.7, Spot.BACH,
                 false, Bed.STREAM));
         lake = new Shape.Ellipse(0, 10, 56, 34, 0.07, 3);
         waters.add(new Water("bergsee", lake, Layout.WATER_Y, 11, 0.33, Spot.BERGSEE, false, Bed.LAKE));
@@ -179,25 +202,70 @@ public final class Terrain {
 
     /** Berge ringsum: steigen mit dem Abstand vom See, dazu Grate und einzelne Gipfel. */
     double mountains(double x, double z) {
-        double dx = x / 112;
-        double dz = (z - 6) / 78;
+        // leicht verbogene Koordinaten: keine geraden Kanten, keine runden Kegel
+        double wx = x + 22 * (Noise.fbm(x / 70, z / 70, 31, 2) - 0.5);
+        double wz = z + 22 * (Noise.fbm(x / 70, z / 70, 37, 2) - 0.5);
+        double dx = wx / 112;
+        double dz = (wz - 6) / 78;
         double r = Math.sqrt(dx * dx + dz * dz);
         double s = Noise.smoothstep(0.70, 1.9, r);
         double h = 63;
+        double rg = Noise.ridge(wx / 70, wz / 70, 23, 3);
         if (s > 0) {
-            double n = Noise.fbm(x / 64, z / 64, 11, 4);
-            double rg = Noise.ridge(x / 88, z / 88, 23, 3);
-            h += s * 128 * (0.18 + 0.57 * rg + 0.25 * n);
+            double n = Noise.fbm(wx / 64, wz / 64, 11, 4);
+            h += s * 120 * (0.16 + 0.6 * rg + 0.24 * n);
         }
         for (Peak p : PEAKS) {
-            double d = Math.hypot(x - p.x(), z - p.z());
-            if (d < p.radius()) {
-                double t = 1 - d / p.radius();
-                double n = Noise.fbm(x / 21, z / 21, 17, 3);
-                h = Math.max(h, 63 + (p.top() - 63) * Math.pow(t, 1.15) * (0.9 + 0.2 * n));
+            h = Math.max(h, peak(p, wx, wz, 0, 0, 1, 1));
+            if (p.top() >= 170) {
+                // zweiter, etwas niedrigerer Gipfel am Grat: Massiv statt Kegel
+                double off = 0.42;
+                h = Math.max(h, peak(p, wx, wz, Math.cos(p.angle()) * p.rx() * off,
+                        Math.sin(p.angle()) * p.rx() * off, 0.86, 0.6));
+                h = Math.max(h, peak(p, wx, wz, -Math.cos(p.angle()) * p.rx() * off * 0.8,
+                        -Math.sin(p.angle()) * p.rx() * off * 0.8, 0.8, 0.55));
+            }
+        }
+        // Rinnen: schmale Erosionsfurchen in den Flanken
+        if (h > 95) {
+            double gully = 1 - Noise.ridge(wx / 13.0 + wz / 40.0, wz / 13.0, 57, 2);
+            double depth = Math.min(1, (h - 95) / 40);
+            h -= 9 * depth * gully * gully;
+        }
+        for (Cirque k : CIRQUES) {
+            double d = Math.hypot(wx - k.x(), wz - k.z()) / k.radius();
+            if (d < 1.4) {
+                double w = 1 - Noise.smoothstep(0.6, 1.4, d);
+                h = Math.max(Math.min(h, 100), h - k.depth() * w);
             }
         }
         return h;
+    }
+
+    /** Breite der Gipfel: flachere Flanken, breitere Stöcke statt Nadeln. */
+    private static final double BROAD = 1.3;
+
+    /** Höhe eines Gipfels (verschoben um ox/oz, Höhe und Breite skaliert); 63, wenn die Stelle außerhalb liegt. */
+    private static double peak(Peak p, double wx, double wz, double ox, double oz, double scale, double size) {
+        double dx = wx - p.x() - ox;
+        double dz = wz - p.z() - oz;
+        double c = Math.cos(p.angle());
+        double sn = Math.sin(p.angle());
+        double u = (dx * c + dz * sn) / (p.rx() * size * BROAD);
+        double v = (-dx * sn + dz * c) / (p.rz() * size * BROAD);
+        double ang = Math.atan2(v, u);
+        double lobe = 0.74 + 0.55 * Noise.fbm(Math.cos(ang) * 1.6 + p.x() * 0.01, Math.sin(ang) * 1.6 + p.z() * 0.01,
+                53, 2);
+        double d = Math.sqrt(u * u + v * v) / lobe;
+        if (d >= 1) {
+            return 63;
+        }
+        double t = 1 - d;
+        double profile = Math.pow(t, p.steep());
+        double ridge = Noise.ridge(wx / 26, wz / 26, 19, 2);
+        double crag = Noise.fbm(wx / 11, wz / 11, 17, 2);
+        return 63 + (p.top() - 63) * scale * profile * (1 - p.ridges() * 0.35 + p.ridges() * 0.7 * ridge)
+                + 6 * (crag - 0.5) * t;
     }
 
     /** Geländehöhe an einer Stelle (Kommazahl, vor dem Runden). */
@@ -220,17 +288,26 @@ public final class Terrain {
         if (ad >= 17) {
             return h;
         }
-        double edge = -109.0 - 0.035 * dz * dz;
+        int bx = (int) Math.floor(x);
+        int bz = (int) Math.floor(z);
+        // zerklüftete Kante: springt vor und zurück, nur um den Fall herum gerade
+        double jag = ad < 4 ? 0 : 2.6 * (Noise.fbm(z / 3.5, 7, 43, 2) - 0.35);
+        double edge = -109.0 - 0.035 * dz * dz - jag;
+        if (bx == Layout.FALL_X && bz >= Layout.FALL_Z1 && bz <= Layout.FALL_Z2) {
+            return Math.max(h, Layout.FALL_LEDGE_Y);
+        }
         if (x >= edge) {
             return h;
         }
-        int bx = (int) Math.floor(x);
-        int bz = (int) Math.floor(z);
-        if (bx == Layout.FALL_X && bz >= Layout.FALL_Z1 && bz <= Layout.FALL_Z2) {
-            return h;
-        }
         double w = ad <= 11 ? 1 : 1 - (ad - 11) / 6;
-        double target = 77 + 5 * Noise.fbm(x / 9, z / 9, 41, 2) + Math.max(0, edge - x) * 0.25;
+        double into = edge - x;
+        double full = 77 + 5 * Noise.fbm(x / 9, z / 9, 41, 2) + into * 0.25;
+        // Neben dem Fall eine senkrechte Wand (hält den oberen Bach), weiter außen eine zerklüftete Felsflanke mit
+        // Stufen, Vorsprüngen und Absätzen statt einer glatten Mauer
+        double crag = Noise.fbm(x / 2.5, z / 2.5, 47, 2);
+        double tier = 64 + 2.4 * into + 7 * (crag - 0.3) + 3 * Noise.fbm(z / 5.0, x / 5.0, 49, 2);
+        double open = Noise.smoothstep(4.5, 7.5, ad);
+        double target = Math.min(full, full * (1 - open) + tier * open);
         return Math.max(h, h + (target - h) * w);
     }
 
@@ -272,7 +349,7 @@ public final class Terrain {
         if (w != null) {
             return w.spot();
         }
-        if (x == Layout.FALL_X && z >= Layout.FALL_Z1 && z <= Layout.FALL_Z2) {
+        if ((x == Layout.FALL_X || x == Layout.FALL_X + 1) && z >= Layout.FALL_Z1 && z <= Layout.FALL_Z2) {
             return Spot.BACH;
         }
         return null;

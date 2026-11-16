@@ -118,10 +118,15 @@ public final class Ambience {
     }
 
     private void waterfall(Player p) {
-        Location base = new Location(pl.world(), Layout.FALL_X + 0.9, Layout.WATER_Y + 1.1,
-                (Layout.FALL_Z1 + Layout.FALL_Z2 + 1) / 2.0);
-        p.spawnParticle(Particle.CLOUD, base, 3, 0.6, 0.3, 1.2, 0.02);
-        p.spawnParticle(Particle.SPLASH, base, 20, 0.8, 0.2, 1.4, 0.3);
+        double mid = (Layout.FALL_Z1 + Layout.FALL_Z2 + 1) / 2.0;
+        Location base = new Location(pl.world(), Layout.FALL_X + 2.2, Layout.WATER_Y + 1.1, mid);
+        p.spawnParticle(Particle.CLOUD, base, 4, 0.9, 0.4, 1.6, 0.02);
+        p.spawnParticle(Particle.SPLASH, base, 26, 1.0, 0.3, 1.6, 0.3);
+        p.spawnParticle(Particle.FALLING_WATER, base.clone().add(0.4, 0.8, 0), 6, 1.0, 0.6, 1.5, 0);
+        // Gischt an der Felsstufe in der Mitte
+        Location ledge = new Location(pl.world(), Layout.FALL_X + 1.2, Layout.FALL_LEDGE_Y + 1.2, mid);
+        p.spawnParticle(Particle.SPLASH, ledge, 12, 0.3, 0.2, 1.4, 0.2);
+        p.spawnParticle(Particle.CLOUD, ledge, 1, 0.3, 0.2, 1.2, 0.01);
         if (r.nextInt(4) == 0) {
             p.playSound(base, Sound.BLOCK_WATER_AMBIENT, SoundCategory.AMBIENT, 0.8f, 0.7f);
         }

@@ -31,7 +31,9 @@ public final class Layout {
     /** Wasserfall: Spalte x, von z bis z (fällt von UPPER_WATER_Y in die Gumpe). */
     public static final int FALL_X = -110;
     public static final int FALL_Z1 = 0;
-    public static final int FALL_Z2 = 2;
+    public static final int FALL_Z2 = 3;
+    /** Felsstufe mitten im Fall: oben fällt das Wasser darauf, dann eine Spalte weiter vorn in die Gumpe. */
+    public static final int FALL_LEDGE_Y = 68;
 
     /** Ein Ort mit Blickrichtung (Minecraft: Gierwinkel 0 = Süden, −90 = Osten, 90 = Westen, 180 = Norden). */
     public record Place(double x, double y, double z, float yaw, float pitch) {

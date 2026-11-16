@@ -17,7 +17,7 @@ Kennung im Netzwerk `angelkoenig`, englisch „Angler King“.
   meiste Fänge, Turniersiege, Angelkönig), `Store`.
 - `world/`: `Terrain` (Gelände aus Rauschen, Aushüben, Felsstufe, Wegen, Gewässern; Biome), `Shape`, `Noise`,
   `Layout` (feste Stellen), `Plan` + `Kit` + `Valley` (alle Bauten), `Surface` (Blöcke je Chunk inkl. Bäume, Blumen,
-  Schilf, Seerosen), `Palette`, `AngelGenerator` (Chunk-Erzeuger), `WorldSetup` (`VERSION` 5, Neubau, Schilder, Banner).
+  Schilf, Seerosen), `Palette`, `AngelGenerator` (Chunk-Erzeuger), `WorldSetup` (`VERSION` 9, Neubau, Schilder, Banner).
 - `play/`: `Angling` (Biss, Fang, Fischbuch, Aufgaben, Verkauf, Netzwerk-Statistik), `FishItems`, `Hotbar`, `Menus`
   (Fischhändler, Köderdose, Kleiderschrank, Fischbuch, Aufgaben, Wegweiser), `Tournaments`, `Boards`, `Npcs`,
   `Ambience`, `Seats`. `listen/`: `PlayerListener`, `FishingListener`, `GuardListener`. `net/`, `menu/` wie die anderen Modi.
@@ -39,6 +39,12 @@ Kennung im Netzwerk `angelkoenig`, englisch „Angler King“.
 - Bilder mit echtem Client 26.3 (nur lokal, `~/mm-cache/bilder-angelkoenig/`): Ankunft, Steg, Seeblick, Händler,
   Wasserfall, Moor, Eisloch, Kapelle, Tafeln, Tal von oben, laufendes Turnier mit Leiste. Danach verbessert:
   Felswände ohne Streifen, Schnee nur auf Fichtenspitzen, Wasser im Brunnen sichtbar, Händlername frei.
+- Schönheitsrunde 2 (Bau-Version 9): Berge natürlicher – Gipfel mit eigener Form (länglich, gedreht, Grate als
+  Ausläufer), Massive mit Nebengipfeln, Vorgipfel, Kare, Erosionsrinnen, Felsbänder, Geröllfelder, Almmatten, Latschen,
+  Schnee in Rinnen und Mulden statt als Kappe; Wasserfall breiter (4 Blöcke) und in zwei Stufen über eine bemooste
+  Felsstufe, Felsflanke daneben gestuft mit Vorsprüngen, Moos, Farn, Ranken, Felsbrocken an der Gumpe, Gischt an Stufe
+  und Gumpe; Händlerschild „Xaver / Fische / Fish“. Neubau 5 → 6 → … → 9 echt geprüft, echter Test wieder 78/78,
+  Bilder `~/mm-cache/bilder-angelkoenig/v2/`.
 - Funde behoben: Wegweiser-Platz am Bergsee warf den Schwimmer auf die Stegkante; Fänge landeten im Wasser statt im
   Korb (kommen jetzt sicher an); Sitz holte einen nach einer Reise zurück; `brick_planks` gibt es nicht.
 

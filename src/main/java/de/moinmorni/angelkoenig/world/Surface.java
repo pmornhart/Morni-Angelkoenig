@@ -224,7 +224,8 @@ public final class Surface {
             wet(out, lx, lz, x, z, c, bottom, reserved);
             return;
         }
-        short topBlock = topBlock(x, z, top, maxDiff, path, cols, lx, lz);
+        int hollow = (h[lx][lz + 2] + h[lx + 4][lz + 2] + h[lx + 2][lz] + h[lx + 2][lz + 4]) / 4 - top;
+        short topBlock = topBlock(x, z, top, maxDiff, hollow, path, cols, lx, lz);
         for (int y = bottom; y <= top; y++) {
             int depth = top - y;
             short b;
@@ -239,6 +240,7 @@ public final class Surface {
         }
         if (!path && !reserved) {
             decor(out, lx, lz, x, z, top, topBlock, cols);
+            latschen(out, lx, lz, x, z, top, maxDiff, topBlock);
         }
     }
 
@@ -313,7 +315,8 @@ public final class Surface {
         };
     }
 
-    private short topBlock(int x, int z, int top, int slope, boolean path, Terrain.Column[][] cols, int lx, int lz) {
+    private short topBlock(int x, int z, int top, int slope, int hollow, boolean path, Terrain.Column[][] cols,
+            int lx, int lz) {
         int r = r100(x, top, z, 66);
         boolean kar = t.inKar(x, z) && top >= Layout.ICE_Y - 1 && top < 100;
         if (path) {
@@ -325,15 +328,21 @@ public final class Surface {
         if (kar) {
             return slope >= 3 && r < 50 ? stone : snowBlock;
         }
-        if (top >= SNOW_LINE && slope <= 3) {
+        if (snowAt(x, z, top, slope, hollow)) {
             return snowBlock;
         }
         if (top >= ROCK_LINE || slope >= 3) {
-            if (top >= 138 && slope <= 2 && r < 60) {
-                return snowBlock;
-            }
             if (top < 104 && slope <= 4 && r < 18) {
                 return r < 9 ? mossyCobble : moss;
+            }
+            // Geröllfelder unter den Wänden
+            double scree = Noise.fbm(x / 13.0, z / 13.0, 91, 2);
+            if (top >= 90 && top < 150 && slope >= 2 && slope <= 4 && scree > 0.58) {
+                return r < 45 ? gravel : r < 75 ? andesite : r < 90 ? cobble : tuff;
+            }
+            // Almmatten über der Baumgrenze
+            if (top < 142 && slope <= 1 && Noise.fbm(x / 17.0, z / 17.0, 93, 2) > 0.5) {
+                return r < 80 ? grass : r < 92 ? podzol : coarse;
             }
             return rock(x, top, z);
         }
@@ -351,6 +360,39 @@ public final class Surface {
             return r < 12 ? podzol : r < 16 ? coarse : grass;
         }
         return r < 3 ? coarse : grass;
+    }
+
+    /**
+     * Schnee liegt in Rinnen und Mulden (wo es tiefer ist als ringsum) und auf flachen Stellen ganz oben – nicht als
+     * gleichmäßige Kappe. Die Schneegrenze schwankt.
+     */
+    private static boolean snowAt(int x, int z, int top, int slope, int hollow) {
+        double line = SNOW_LINE + 18 * (Noise.fbm(x / 40.0, z / 40.0, 95, 2) - 0.5);
+        double patch = Noise.fbm(x / 9.0, z / 9.0, 97, 2);
+        if (top >= 122 && hollow >= 2 && slope <= 7) {
+            return true;
+        }
+        if (top >= 130 && hollow >= 1 && slope <= 4 && patch > 0.3) {
+            return true;
+        }
+        if (top >= line && slope <= 2 && patch > 0.3) {
+            return true;
+        }
+        return top >= line + 18 && slope <= 3 && patch > 0.45;
+    }
+
+    /** Latschen: niedrige Kiefernbüsche über der Baumgrenze. */
+    private void latschen(Chunk out, int lx, int lz, int x, int z, int top, int slope, short topBlock) {
+        if (top < 108 || top > 146 || slope > 2 || topBlock == snowBlock || topBlock == gravel) {
+            return;
+        }
+        if (Noise.fbm(x / 7.0, z / 7.0, 99, 2) < 0.56 || r100(x, top, z, 79) >= 70) {
+            return;
+        }
+        out.set(lx, top + 1, lz, spruceLeaves);
+        if (r100(x, top + 1, z, 78) < 30) {
+            out.set(lx, top + 2, lz, spruceLeaves);
+        }
     }
 
     private static boolean waterNear(Terrain.Column[][] cols, int lx, int lz) {
@@ -382,10 +424,22 @@ public final class Surface {
 
     /** Fels: grauer Kalk mit Flecken – größere Felder statt Einzelblock-Rauschen, oben heller (Kalkstein). */
     private short rock(int x, int y, int z) {
+        if (y >= 84) {
+            // Felsbänder: waagrechte, leicht wellige Schichten
+            double wave = 5 * Noise.fbm(x / 40.0, z / 40.0, 89, 2);
+            int band = (int) Math.floor((y + wave) / 6.0);
+            int rb = r100(x, y, z, 88);
+            if (Math.floorMod(band, 4) == 0) {
+                return rb < 55 ? andesite : rb < 75 ? tuff : stone;
+            }
+            if (Math.floorMod(band, 7) == 3) {
+                return rb < 50 ? tuff : stone;
+            }
+        }
         double patch = Noise.value(x / 5.0 + y / 9.0, z / 5.0 - y / 11.0, 87);
         int r = r100(x, y, z, 68);
-        if (y >= 105 && patch > 0.72) {
-            return r < 70 ? calcite : stone;
+        if (y >= 105 && patch > 0.8) {
+            return r < 40 ? calcite : stone;
         }
         if (patch < 0.22) {
             return r < 75 ? andesite : stone;

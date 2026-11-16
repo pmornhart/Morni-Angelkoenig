@@ -216,8 +216,8 @@ public final class Valley {
         }
         Kit.hangingLantern(p, x1 + 1, S + 2, z1 + 1, 0);
         Kit.hangingLantern(p, x2 - 1, S + 2, z1 + 1, 0);
-        p.sign(x1 + 2, S + 2, z1 - 1, "spruce_hanging_sign[rotation=8,attached=false,waterlogged=false]", "",
-                "Xaver", "Fische \u00b7 Fish", "");
+        p.sign(x1 + 2, S + 2, z1 - 1, "spruce_hanging_sign[rotation=8,attached=false,waterlogged=false]",
+                "Xaver", "Fische", "Fish", "");
         p.reserve(x1 - 2, z1 - 2, x2 + 2, z2 + 1);
     }
 
@@ -411,25 +411,57 @@ public final class Valley {
         Kit.bench(p, -98, S, Layout.POOL_DECK_Z1, 2, "north", "spruce");
         p.reserve(Layout.POOL_DECK_X1 - 2, Layout.POOL_DECK_Z1 - 2, Layout.POOL_DECK_X2 + 2,
                 Layout.POOL_DECK_Z2 + 1);
-        // Wasserfall: fallendes Wasser von oben in die Gumpe
+        // Wasserfall in zwei Stufen: oben aus dem Bach auf die Felsstufe, dann eine Spalte weiter vorn in die Gumpe
         for (int z = Layout.FALL_Z1; z <= Layout.FALL_Z2; z++) {
-            for (int fy = Layout.WATER_Y + 1; fy <= Layout.UPPER_WATER_Y; fy++) {
+            for (int fy = Layout.FALL_LEDGE_Y + 1; fy <= Layout.UPPER_WATER_Y; fy++) {
                 p.set(Layout.FALL_X, fy, z, "water[level=8]");
             }
+            for (int fy = Layout.WATER_Y + 1; fy <= Layout.FALL_LEDGE_Y + 1; fy++) {
+                p.set(Layout.FALL_X + 1, fy, z, "water[level=8]");
+            }
+            p.set(Layout.FALL_X, Layout.FALL_LEDGE_Y, z, z % 2 == 0 ? "mossy_cobblestone" : "moss_block");
         }
-        // Moos und Farn an der Felswand neben dem Fall
-        for (int z = Layout.FALL_Z1 - 3; z <= Layout.FALL_Z2 + 3; z++) {
-            for (int x = Layout.FALL_X - 1; x <= Layout.FALL_X; x++) {
-                if (x == Layout.FALL_X && z >= Layout.FALL_Z1 && z <= Layout.FALL_Z2) {
+        // zerklüftete Wand: Moos, Farn, Ranken, Vorsprünge
+        for (int z = Layout.FALL_Z1 - 9; z <= Layout.FALL_Z2 + 9; z++) {
+            for (int x = Layout.FALL_X - 4; x <= Layout.FALL_X; x++) {
+                if (x == Layout.FALL_X && z >= Layout.FALL_Z1 - 1 && z <= Layout.FALL_Z2 + 1) {
                     continue;
                 }
                 int top = t.height(x, z);
-                for (int fy = Layout.WATER_Y + 1; fy <= Math.min(top, Layout.UPPER_WATER_Y + 3); fy++) {
-                    if (Kit.roll(x, fy, z, 3) == 0) {
-                        p.set(x, fy, z, Kit.roll(x, fy + 1, z, 2) == 0 ? "moss_block" : "mossy_cobblestone");
+                if (top <= Layout.GROUND_Y + 1 || t.waterAt(x, z) != null) {
+                    continue;
+                }
+                for (int fy = Layout.WATER_Y + 1; fy <= Math.min(top, Layout.UPPER_WATER_Y + 4); fy++) {
+                    int r = Kit.roll(x, fy, z, 7);
+                    if (r < 3) {
+                        p.set(x, fy, z, r == 0 ? "moss_block" : r == 1 ? "mossy_cobblestone" : "tuff");
                     }
                 }
+                boolean east = t.height(x + 1, z) < top - 1;
+                if (east && Kit.roll(x, top, z, 4) == 0) {
+                    p.set(x + 1, top, z, "vine[west=true]");
+                    p.set(x + 1, top - 1, z, "vine[west=true]");
+                }
+                if (t.height(x + 1, z) <= top - 3 && Kit.roll(x, top + 1, z, 3) == 0) {
+                    p.set(x, top + 1, z, Kit.roll(z, top, x, 2) == 0 ? "fern" : "moss_carpet");
+                }
             }
+        }
+        // Gumpe: bemooste Felsbrocken am Rand, Farn dazwischen (Wurfbahn vom Steg bleibt frei)
+        int[][] stones = {{-108, -5, 2}, {-107, -6, 1}, {-108, 7, 2}, {-106, 9, 1}, {-101, 11, 2}, {-95, 10, 1},
+            {-91, 6, 1}};
+        for (int[] st : stones) {
+            int top = t.height(st[0], st[1]);
+            if (t.waterAt(st[0], st[1]) != null) {
+                continue;
+            }
+            for (int dx = 0; dx < st[2]; dx++) {
+                for (int dzz = 0; dzz < st[2]; dzz++) {
+                    p.set(st[0] + dx, top + 1, st[1] + dzz, (dx + dzz) % 2 == 0 ? "mossy_cobblestone" : "andesite");
+                }
+            }
+            p.set(st[0], top + 1 + (st[2] > 1 ? 1 : 0), st[1], "moss_block");
+            p.set(st[0] + st[2], top + 1, st[1], "fern");
         }
         // Marterl (Wegkreuz mit Dach) am Weg zur Gumpe
         int mx = -91;

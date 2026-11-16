@@ -29,7 +29,7 @@ class TerrainTest {
     }
 
     private static boolean fall(int x, int z) {
-        return x == Layout.FALL_X && z >= Layout.FALL_Z1 && z <= Layout.FALL_Z2;
+        return (x == Layout.FALL_X || x == Layout.FALL_X + 1) && z >= Layout.FALL_Z1 && z <= Layout.FALL_Z2;
     }
 
     /** Kein Gewässer läuft aus: jeder Nachbar ist Wasser gleicher Höhe oder Land, das mindestens so hoch ist. */
