@@ -559,9 +559,6 @@ public final class Surface {
                         continue;
                     }
                     put(out, x0, z0, x + dx, ly, z + dz, spruceLeaves, false);
-                    if (snowy && layer % 2 == 1) {
-                        put(out, x0, z0, x + dx, ly + 1, z + dz, snow[1], false);
-                    }
                 }
             }
         }

@@ -44,7 +44,7 @@ public final class Layout {
     public static final Map<Spot, Place> SPOTS = new EnumMap<>(Spot.class);
 
     static {
-        SPOTS.put(Spot.BERGSEE, new Place(0.5, STAND_Y, -9.5, 0f, 10f));
+        SPOTS.put(Spot.BERGSEE, new Place(0.5, STAND_Y, -7.5, 0f, 20f));
         SPOTS.put(Spot.BACH, new Place(-99.5, STAND_Y, -7.5, 0f, 15f));
         SPOTS.put(Spot.MOOR, new Place(85.5, STAND_Y + 0.5, 6.5, -90f, 15f));
         SPOTS.put(Spot.EIS, new Place(69.5, KAR_Y, 93.5, 0f, 30f));

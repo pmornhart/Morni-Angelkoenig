@@ -21,7 +21,7 @@ const PASS = fs.readFileSync(PASS_FILE, 'utf8').trim();
 const VERSION = process.env.MC_VERSION ?? '26.1';
 const SPAWN = { x: 0.5, y: 64, z: -46.5 };
 const PLACES = {
-  bergsee: { at: { x: 0.5, y: 64, z: -9.5 }, cast: new Vec3(0.5, 62.9, -4.5) },
+  bergsee: { at: { x: 0.5, y: 64, z: -7.5 }, cast: new Vec3(0.5, 62.9, -2.5) },
   bach: { at: { x: -99.5, y: 64, z: -7.5 }, cast: new Vec3(-99.5, 62.9, -2.5) },
   moor: { at: { x: 85.5, y: 64.5, z: 6.5 }, cast: new Vec3(90.5, 62.9, 6.5) },
   eis: { at: { x: 69.5, y: 83, z: 93.5 }, cast: new Vec3(69.5, 82.9, 96.0) },
@@ -365,9 +365,16 @@ async function main() {
   check('Bank am Lagerfeuer', bench && bench.name === 'spruce_stairs', bench && bench.name);
   if (bench) await anna.activateBlock(bench);
   check('Hinsetzen per Rechtsklick (leere Hand)', await waitFor(() => Boolean(anna.vehicle), 3000));
-  anna.dismount();
-  await sleep(800);
-  check('Aufstehen', await waitFor(() => !anna.vehicle, 3000));
+  anna.setControlState('sneak', true);
+  await sleep(1200);
+  anna.setControlState('sneak', false);
+  await sleep(500);
+  if (anna.vehicle) {
+    anna.dismount();
+    await sleep(1000);
+  }
+  const seats = String(await cmd(inWorld('execute if entity @e[tag=ak_seat]')));
+  check('Aufstehen: Sitz ist wieder weg', /: 0\b|failed/i.test(seats), seats.trim());
 
   // ------------------------------------------------------------------ Köder benutzen, Moor, Party
   await travel(anna, 'moor');
@@ -417,7 +424,7 @@ async function main() {
   // ------------------------------------------------------------------ Turnier
   await travel(anna, 'bergsee');
   await travel(bert, 'bergsee');
-  await cmd(inWorld('tp Bert 3.5 64 -8.5 0 10'));
+  await cmd(inWorld('tp Bert 3.5 64 -7.5 0 20'));
   clear(anna, bert);
   await cmd('angeladmin turnier start');
   check('Turnier beginnt: Ansage auf Deutsch und Englisch', await waitFor(() => sees(anna, /Das Angel-Turnier läuft/)

@@ -139,6 +139,7 @@ public final class AngelkoenigPlugin extends JavaPlugin {
             boards.spawn();
             boards.refreshSpots();
             npcs.tick();
+            seats.sweep();
             if (npcs.missing()) {
                 npcs.spawn();
             }

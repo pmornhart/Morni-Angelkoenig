@@ -74,8 +74,13 @@ public final class Seats implements Listener {
         if (seat.getScoreboardTags().contains(TAG)) {
             seat.remove();
             if (e.getEntity() instanceof Player p) {
-                Location up = p.getLocation().add(0, 0.6, 0);
-                pl.getServer().getScheduler().runTask(pl, () -> p.teleport(up));
+                Location seatAt = seat.getLocation();
+                pl.getServer().getScheduler().runTask(pl, () -> {
+                    // nur aufrichten, wenn man noch an der Bank ist (nicht nach einer Reise mit dem Wegweiser)
+                    if (p.getWorld() == seatAt.getWorld() && p.getLocation().distanceSquared(seatAt) < 2.5) {
+                        p.teleport(p.getLocation().add(0, 0.6, 0));
+                    }
+                });
             }
         }
     }
@@ -85,6 +90,15 @@ public final class Seats implements Listener {
         Entity v = e.getPlayer().getVehicle();
         if (v != null && v.getScoreboardTags().contains(TAG)) {
             v.remove();
+        }
+    }
+
+    /** Leere Sitze aufräumen (falls jemand ohne Absteigen verschwunden ist). */
+    public void sweep() {
+        for (Entity e : pl.world().getEntitiesByClass(BlockDisplay.class)) {
+            if (e.getScoreboardTags().contains(TAG) && e.getPassengers().isEmpty()) {
+                e.remove();
+            }
         }
     }
 
