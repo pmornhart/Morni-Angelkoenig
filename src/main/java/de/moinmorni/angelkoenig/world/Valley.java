@@ -216,9 +216,8 @@ public final class Valley {
         }
         Kit.hangingLantern(p, x1 + 1, S + 2, z1 + 1, 0);
         Kit.hangingLantern(p, x2 - 1, S + 2, z1 + 1, 0);
-        p.sign((x1 + x2) / 2 + 1, S + 2, z1 - 1, "spruce_wall_sign[facing=north]", "", "Fischhändler",
-                "Fishmonger", "");
-        p.set((x1 + x2) / 2 + 1, S + 2, z1, "spruce_planks");
+        p.sign(x1 + 2, S + 2, z1 - 1, "spruce_hanging_sign[rotation=8,attached=false,waterlogged=false]", "",
+                "Xaver", "Fische \u00b7 Fish", "");
         p.reserve(x1 - 2, z1 - 2, x2 + 2, z2 + 1);
     }
 

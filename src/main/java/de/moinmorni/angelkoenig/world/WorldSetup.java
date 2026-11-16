@@ -44,7 +44,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public final class WorldSetup implements Listener {
 
     /** Bau-Version des Tals: erhöhen, wenn sich Gelände oder Bauten ändern – dann entsteht die Welt neu. */
-    public static final int VERSION = 4;
+    public static final int VERSION = 5;
     private static final String STAMP = "welt.yml";
 
     private final JavaPlugin plugin;
