@@ -1,0 +1,13 @@
+# Bau-Ausgaben
+target/
+# Test-Server (liegen außerhalb, falls doch einer hier landet)
+test/server/
+angelkoenig-test*/
+*.log
+# Werkzeuge
+.idea/
+*.iml
+.vscode/
+node_modules/
+# Vorschaubilder der Karte (nur lokal)
+karte*.png
