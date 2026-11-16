@@ -50,9 +50,6 @@ public final class Ambience {
     /** Jede Sekunde: Wetter weiterschalten, wenn es Zeit ist. */
     public void second() {
         if (!pl.settings().weatherChanges()) {
-            if (pl.world().hasStorm()) {
-                setWeather(Weather.KLAR, 3600);
-            }
             return;
         }
         if (nextWeather == 0) {

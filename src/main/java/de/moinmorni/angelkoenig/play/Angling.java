@@ -154,10 +154,13 @@ public final class Angling {
             e.setCancelled(true);
             e.getHook().remove();
         } else if (e.getCaught() instanceof Item item) {
-            item.setItemStack(FishItems.create(c, spot, time, today, p.getName(), lang));
+            ItemStack fish = FishItems.create(c, spot, time, today, p.getName(), lang);
+            item.setItemStack(fish);
             item.setOwner(uuid);
             item.setCanMobPickup(false);
             item.setPickupDelay(0);
+            // Der Fang fliegt sichtbar heran; landet er im Wasser oder am Steg, kommt er trotzdem sicher in den Korb.
+            pl.getServer().getScheduler().runTaskLater(pl, () -> deliver(p, item), 12L);
         }
         boolean first = !d.knows(c.species());
         boolean personal = d.addCatch(c, today);
@@ -187,6 +190,18 @@ public final class Angling {
         pl.store().save(d);
         if (record) {
             pl.saveRecords();
+        }
+    }
+
+    /** Fang direkt in den Korb, falls er noch nicht aufgehoben wurde. */
+    private void deliver(Player p, Item item) {
+        if (!item.isValid() || !p.isOnline()) {
+            return;
+        }
+        ItemStack stack = item.getItemStack();
+        item.remove();
+        for (ItemStack rest : p.getInventory().addItem(stack).values()) {
+            p.getWorld().dropItem(p.getLocation(), rest).setOwner(p.getUniqueId());
         }
     }
 

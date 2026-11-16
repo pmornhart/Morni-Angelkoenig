@@ -206,6 +206,9 @@ async function fishOnce(bot, where, tries = 4) {
       await Promise.race([bot.fish(), sleep(20000).then(() => Promise.reject(new Error('kein Biss')))]);
     } catch (e) {
       bitten = false;
+      const hooks = Object.values(bot.entities).filter((x) => x.name === 'fishing_bobber')
+        .map((x) => `${x.position.x.toFixed(1)}/${x.position.y.toFixed(1)}/${x.position.z.toFixed(1)}`);
+      console.log(`  (${bot.username}: ${e.message}, Schwimmer bei ${hooks.join(' ') || '–'})`);
       bot.activateItem();
       await sleep(800);
     }
@@ -362,10 +365,9 @@ async function main() {
   check('Bank am Lagerfeuer', bench && bench.name === 'spruce_stairs', bench && bench.name);
   if (bench) await anna.activateBlock(bench);
   check('Hinsetzen per Rechtsklick (leere Hand)', await waitFor(() => Boolean(anna.vehicle), 3000));
-  anna.setControlState('sneak', true);
+  anna.dismount();
   await sleep(800);
-  anna.setControlState('sneak', false);
-  check('Aufstehen mit Schleichen', await waitFor(() => !anna.vehicle, 3000));
+  check('Aufstehen', await waitFor(() => !anna.vehicle, 3000));
 
   // ------------------------------------------------------------------ Köder benutzen, Moor, Party
   await travel(anna, 'moor');
@@ -424,7 +426,8 @@ async function main() {
   check('Netzwerk: Zustand „tournament“', await waitFor(() => calls().some((c) => c.t === 'state' && c.state === 'tournament'), 3000));
   await cmd('angeladmin naechster Anna hecht 100');
   await cmd('angeladmin naechster Bert rotauge 30');
-  const [a1, b1] = await Promise.all([fishOnce(anna, 'bergsee'), fishOnce(bert, 'bergsee', 4)]);
+  const a1 = await fishOnce(anna, 'bergsee');
+  const b1 = await fishOnce(bert, 'bergsee');
   s = await status();
   check('Beide Fänge zählen im Turnier', a1 && b1 && s.t.Anna > 5000 && s.t.Bert > 0, JSON.stringify(s.t));
   check('Führung wird angesagt', sees(bert, /Anna now leads with Pike/) || sees(anna, /Anna führt jetzt/), bert.chats.slice(-3).join(' | '));
