@@ -1,6 +1,6 @@
 # Stand – Morni Angelkönig
 
-**Was es ist:** Der Angel-Modus des Netzwerks morni.net (Paper-Plugin `MorniAngelkoenig`, Java 25, Paper 26.x):
+**Was es ist:** Der Angel-Modus des MoinMorni-Netzwerks (Paper-Plugin `MorniAngelkoenig`, Java 25, Paper 26.x):
 gemütliches Angeln in einem großen Alpen-Tal – jederzeit betretbar, ohne Runden. Eigene Fische der Alpen, vier
 Fangplätze, Fischhändler, Fischbuch, Aufgaben des Tages, Angel-Turnier alle 15 Minuten, Bestenlisten.
 Kennung im Netzwerk `angelkoenig`, englisch „Angler King“.
@@ -64,11 +64,6 @@ Kennung im Netzwerk `angelkoenig`, englisch „Angler King“.
   nicht noch einmal, Köder-Hinweis in der Aktionsleiste nur noch, wenn die Dose fast leer ist (Anzahl steht an der
   Köderdose und in der Leiste). Turnier-Automatik im laufenden Server gesehen: zur Viertelstunde Vorwarnung und Start
   mit zwei Anglern.
-- **Umbenannt in morni.net** (16.11., Philip): Paket `net.morni.angelkoenig`, Schnittstelle `net.morni.api.MorniNet`
-  (byte-gleich aus dem Netzwerk-Repo), `softdepend: [MorniNet]`, Recht `morninet.angelkoenig.admin`, Texte und Leiste
-  „morni.net“, Test-Netzwerk `MorniNet` (`plugins/MorniNet/`). Plugin-Name, Datenordner (`plugins/MorniAngelkoenig/`)
-  und Kennung `angelkoenig` bleiben – bestehende Fänge und Spielerdaten gelten weiter. Version bleibt 0.1.0 (noch nicht
-  veröffentlicht). Unit-Tests, `-Ppaper-26.1 compile` und echter Test **83/83** grün.
 - Beobachtet (nicht geklärt): Einmal blieb im echten Client 26.3 (über ViaVersion an Paper 26.1.2) Regen sichtbar,
   obwohl das Tal laut Server klar war; nach neuem Einloggen weg. Wohl Wetter-Abgleich über Via, nicht das Plugin.
 - Funde behoben: Wegweiser-Platz am Bergsee warf den Schwimmer auf die Stegkante; Fänge landeten im Wasser statt im
