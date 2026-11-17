@@ -25,6 +25,28 @@ Kennung im Netzwerk `angelkoenig`, englisch „Angler King“.
 
 ## Stand (16.11.2026)
 
+- Version 0.2.1 (Branch `claude/kleidung-designs`, 17.11., wartet auf Philips Go): **Hüte und Kleidung mit eigenem
+  Aussehen** (Philip nach den Fisch-Designs: „für die Hüte auch eigene Designs“). `fish/ClothingModels`: jedes Stück
+  trägt `custom_model_data` = `moinmorni:kleidung/<stück>` (Liste `docs/kleidung-modelle.txt`, Kopie im Netzwerk-Repo,
+  `ClothingModelsTest`); die 3D-Modelle und Muster baut das Netzwerk (`packages/builder/src/kleidung/`). Am Körper
+  **je Betrachter** (`play/ClothingLooks`): mit Paket ist ein Hut ein Stück ohne Rüstungs-Aussehen (Minecraft zeigt
+  dann das 3D-Modell auf dem Kopf), Weste/Jacke/Hosen/Stiefel tragen das Aussehen `moinmorni:kleidung/<stück>`; ohne
+  Paket (abgelehnt, ältere Version, Bedrock/Floodgate) bleibt die Lederrüstung. Der Träger bekommt seine Fassung ins
+  Inventar, allen anderen schickt Angelkönig, wo ihr Paket anders ist, die passende Fassung nur zum Ansehen
+  (`sendEquipmentChange`: beim Sichtbarwerden, nach jedem Umziehen, alle 2 s). **Paket-Angebot** (`play/PackOffer`):
+  Angelkönig bietet das Paket aus `plugins/MorniAngelkoenig/paket.json` beim Verbinden selbst an
+  (`AsyncPlayerConnectionConfigureEvent`, wartet auf die Antwort) – beim Paket aus der server.properties erfährt ein
+  Plugin die Antwort nicht (`getResourcePackStatus()` sagt dann immer „geladen“), und ein zweites Anbieten im Spiel
+  lädt alles noch einmal (beides im echten Client gesehen); legt `paket-angebot` an, damit das Netzwerk das Paket
+  nicht mehr in die server.properties schreibt. Krone ohne Verzauberungs-Glanz, im Kleiderschrank glänzt Angezogenes
+  nur ohne Paket. `/angeladmin kleidung <spieler> <stück>|alle|aus`, `status` mit `paket=` und `kleidung=`.
+  Geprüft: 60 Unit-Tests, Paper 26.1 übersetzt. Echt: Paper 26.1.2 + zwei Test-Spieler (Anna nimmt das Paket, Bert
+  lehnt ab) **11/11** – Anna trägt den Hut ohne Rüstungs-Aussehen und die Weste mit eigenem, Bert die gewohnte Krone,
+  Anna sieht Berts 3D-Krone und Wathose, Bert an Anna nur Leder (auch nach Umziehen), wieder in Sicht gleich richtig;
+  Paper 26.3 + echter Client 26.3 (Paket von lokalem HTTP über `paket.json`, ein Ladebildschirm): alle vier Hüte auf
+  dem Kopf (F5 von vorn und hinten), Weste, Regenjacke, Lederhose, Wathose, Gummistiefel am Körper, Kleiderschrank mit
+  3D-Bildern; ohne Paket Lederkleidung und Goldhelm (Bilder nur lokal `/home/user/mm-cache/bilder-kleidung/`).
+
 - Version 0.2.0 (Branch `claude/fisch-designs`, 17.11., wartet auf Philips Go): **Jeder Fisch mit eigenem Aussehen**
   (Philip: „die Fische alle ein custom design“ – ersetzt für die Fische „nur Minecraft-Gegenstände“). `fish/FishModels`:
   jeder Fang, jeder Fischbuch-Eintrag und die Anzeigen im Tal (Theke, Räucherei, Goldforelle am Brunnen,
@@ -110,6 +132,9 @@ Kennung im Netzwerk `angelkoenig`, englisch „Angler King“.
 
 ## Offen
 
+- Philip: Go für `main` mit 0.2.1 (Hüte und Kleidung; zusammen mit dem Netzwerk-Branch `claude/kleidung-designs`,
+  der `paket.json` schreibt). Nicht echt geprüft: über Velocity/Netzwerk, Bedrock, Spieler mit Paket aus älterer
+  Version.
 - Philip: Go für `main` mit 0.2.0 (eigene Fisch-Zeichnungen; das Paket kommt aus dem Netzwerk-Branch
   `claude/fisch-designs`).
 

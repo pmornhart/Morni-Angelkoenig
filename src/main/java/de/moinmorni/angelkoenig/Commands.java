@@ -3,6 +3,7 @@ package de.moinmorni.angelkoenig;
 import de.moinmorni.angelkoenig.data.PlayerData;
 import de.moinmorni.angelkoenig.data.Records;
 import de.moinmorni.angelkoenig.fish.Catch;
+import de.moinmorni.angelkoenig.fish.Cosmetic;
 import de.moinmorni.angelkoenig.fish.CatchRules;
 import de.moinmorni.angelkoenig.fish.DayTime;
 import de.moinmorni.angelkoenig.fish.Quest;
@@ -11,7 +12,9 @@ import de.moinmorni.angelkoenig.fish.Tournament;
 import de.moinmorni.angelkoenig.fish.Units;
 import de.moinmorni.angelkoenig.fish.Weather;
 import de.moinmorni.angelkoenig.play.Angling;
+import de.moinmorni.angelkoenig.play.ClothingLooks;
 import de.moinmorni.angelkoenig.play.FishItems;
+import de.moinmorni.angelkoenig.play.Hotbar;
 import de.moinmorni.angelkoenig.play.Menus;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -289,6 +292,33 @@ public final class Commands implements TabExecutor {
                 }
                 s.sendMessage(Texts.text(lang, "admin.done"));
             }
+            case "kleidung" -> {
+                // <spieler> <stück>|alle|aus: Stück schenken und anziehen, alles schenken oder alles ausziehen
+                // (für Bilder und Tests – Kleidung gibt es sonst nur beim Fischhändler und für Turniersiege)
+                Player p = a.length > 2 ? Bukkit.getPlayerExact(a[1]) : null;
+                if (p == null) {
+                    s.sendMessage(Texts.text(lang, "admin.usage"));
+                    return;
+                }
+                PlayerData d = pl.data(p);
+                String what = a[2].toLowerCase(Locale.ROOT);
+                if (what.equals("aus")) {
+                    d.undress();
+                } else if (what.equals("alle")) {
+                    Arrays.stream(Cosmetic.values()).forEach(d::addCosmetic);
+                } else {
+                    Optional<Cosmetic> c = Cosmetic.byId(what);
+                    if (c.isEmpty()) {
+                        s.sendMessage(Texts.text(lang, "admin.usage"));
+                        return;
+                    }
+                    d.addCosmetic(c.get());
+                    d.wear(c.get());
+                }
+                Hotbar.armor(p, d, pl.lang(p));
+                pl.store().save(d);
+                s.sendMessage(Texts.text(lang, "admin.done"));
+            }
             case "fischbuch" -> {
                 // alle | leer | <art> [cm]: Fischbuch füllen oder leeren (für Bilder und Tests)
                 Player p = a.length > 2 ? Bukkit.getPlayerExact(a[1]) : null;
@@ -402,7 +432,7 @@ public final class Commands implements TabExecutor {
 
     /**
      * Maschinenlesbar für Tests: Turnier, Zeit, Wetter, je Spieler Taler, Fänge, Arten, Angel, Köder, Aufgaben, Ort
-     * und wie lange der letzte Biss her ist (ms, −1 = keiner).
+     * Paket geladen und getragene Kleidung, und wie lange der letzte Biss her ist (ms, −1 = keiner).
      */
     private String status() {
         Tournament t = pl.tournaments().state();
@@ -426,6 +456,10 @@ public final class Commands implements TabExecutor {
                 sb.append(" a").append(i).append('=').append(qs.get(i).spec()).append('|').append(d.progress(i))
                         .append('|').append(d.done(i));
             }
+            sb.append(" paket=").append(ClothingLooks.sees(p)).append('/').append(p.getResourcePackStatus())
+                    .append(" kleidung=");
+            Arrays.stream(Cosmetic.Slot.values()).map(d::worn).filter(java.util.Objects::nonNull)
+                    .forEach(c -> sb.append(c.id()).append(','));
             sb.append(" ort=").append(pl.angling().spotAt(p.getLocation()).id())
                     .append(" biss=").append(pl.angling().sinceBite(p.getUniqueId()));
         }
@@ -439,7 +473,7 @@ public final class Commands implements TabExecutor {
         if (name.equals("angeladmin")) {
             if (args.length == 1) {
                 options.addAll(List.of("info", "status", "turnier", "zeit", "wetter", "taler", "geld", "naechster", "aufgabe",
-                        "fisch", "fischbuch", "melden", "neubauen", "neuladen"));
+                        "fisch", "fischbuch", "kleidung", "melden", "neubauen", "neuladen"));
             } else if (args.length == 2) {
                 switch (args[0].toLowerCase(Locale.ROOT)) {
                     case "turnier" -> options.addAll(List.of("start", "ende", "stopp"));
@@ -449,6 +483,9 @@ public final class Commands implements TabExecutor {
                 }
             } else if (args.length == 3 && (args[0].equalsIgnoreCase("naechster") || args[0].equalsIgnoreCase("fisch"))) {
                 Arrays.stream(Species.values()).forEach(sp -> options.add(sp.id()));
+            } else if (args.length == 3 && args[0].equalsIgnoreCase("kleidung")) {
+                options.addAll(List.of("alle", "aus"));
+                Arrays.stream(Cosmetic.values()).forEach(c -> options.add(c.id()));
             } else if (args.length == 3 && args[0].equalsIgnoreCase("fischbuch")) {
                 options.addAll(List.of("alle", "leer"));
                 Arrays.stream(Species.values()).forEach(sp -> options.add(sp.id()));

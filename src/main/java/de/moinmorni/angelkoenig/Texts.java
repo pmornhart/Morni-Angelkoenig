@@ -509,8 +509,8 @@ public final class Texts {
         t("top.usage", "<gray>/top [faenge|turniere|rekorde]</gray>", "<gray>/top [catches|wins|records]</gray>");
 
         // ---------- Verwaltung ----------
-        t("admin.usage", "<gray>/angeladmin info|status|turnier <start|ende|stopp>|zeit <morgen|tag|abend|nacht>|wetter <klar|regen|gewitter>|taler <spieler> <betrag>|geld [spieler] <betrag>|naechster <spieler> <art> [cm]|fisch <spieler> <art> [cm]|fischbuch <spieler> <alle|leer|art> [cm]|aufgabe <spieler> <0-2> <art:ziel:anzahl:belohnung>|melden|neubauen|neuladen</gray>",
-                "<gray>/angeladmin info|status|turnier <start|ende|stopp>|zeit <morgen|tag|abend|nacht>|wetter <klar|regen|gewitter>|taler <spieler> <betrag>|geld [spieler] <betrag>|naechster <spieler> <art> [cm]|fisch <spieler> <art> [cm]|fischbuch <spieler> <alle|leer|art> [cm]|aufgabe <spieler> <0-2> <art:ziel:anzahl:belohnung>|melden|neubauen|neuladen</gray>");
+        t("admin.usage", "<gray>/angeladmin info|status|turnier <start|ende|stopp>|zeit <morgen|tag|abend|nacht>|wetter <klar|regen|gewitter>|taler <spieler> <betrag>|geld [spieler] <betrag>|naechster <spieler> <art> [cm]|fisch <spieler> <art> [cm]|fischbuch <spieler> <alle|leer|art> [cm]|kleidung <spieler> <stück|alle|aus>|aufgabe <spieler> <0-2> <art:ziel:anzahl:belohnung>|melden|neubauen|neuladen</gray>",
+                "<gray>/angeladmin info|status|turnier <start|ende|stopp>|zeit <morgen|tag|abend|nacht>|wetter <klar|regen|gewitter>|taler <spieler> <betrag>|geld [spieler] <betrag>|naechster <spieler> <art> [cm]|fisch <spieler> <art> [cm]|fischbuch <spieler> <alle|leer|art> [cm]|kleidung <spieler> <stück|alle|aus>|aufgabe <spieler> <0-2> <art:ziel:anzahl:belohnung>|melden|neubauen|neuladen</gray>");
         t("admin.done", "<em>Erledigt.</em>", "<em>Done.</em>");
         // Geld zum Testen (Owner und Admins)
         t("admin.money.usage", "<gray>So geht's: <white>/angeladmin geld [spieler] \\<betrag></white> – Taler dazugeben (1 bis 1.000.000), ohne Spieler bekommst du sie selbst.</gray>",

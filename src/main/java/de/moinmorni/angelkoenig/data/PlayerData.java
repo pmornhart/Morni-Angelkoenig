@@ -273,6 +273,18 @@ public final class PlayerData {
     }
 
     /** Anziehen bzw. (wenn schon an) ausziehen. Liefert {@code true}, wenn es jetzt getragen wird. */
+    /** Anziehen (nur, was im Kleiderschrank ist); ersetzt das Stück am selben Platz. */
+    public void wear(Cosmetic c) {
+        if (wardrobe.contains(c)) {
+            worn.put(c.slot(), c);
+        }
+    }
+
+    /** Alles ausziehen. */
+    public void undress() {
+        worn.clear();
+    }
+
     public boolean toggleWear(Cosmetic c) {
         if (!wardrobe.contains(c)) {
             return false;

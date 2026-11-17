@@ -57,10 +57,21 @@ Königskrone (nur für Turniersieger).
 | `/fischbuch` · `/aufgaben` · `/wegweiser` · `/koeder` · `/kleiderschrank` | dieselben Fenster wie in der Schnellleiste |
 | `/turnier` | wann das nächste Turnier ist |
 | `/stats [spieler]` · `/top [faenge\|turniere\|rekorde]` | Statistik und Bestenlisten |
-| `/angeladmin info\|status\|turnier start\|ende\|stopp\|zeit …\|wetter …\|taler …\|geld [spieler] <betrag>\|naechster …\|fisch …\|fischbuch …\|aufgabe …\|melden\|neubauen\|neuladen` | Verwaltung und Tests (`moinmorni.angelkoenig.admin`); `fisch <spieler> <art> [cm]` legt einen Fang in den Korb, `fischbuch <spieler> alle\|leer\|<art>` füllt oder leert das Fischbuch (für Bilder), `geld [spieler] <betrag>` gibt Taler dazu – ohne Spieler einem selbst (für Owner und Admins zum Testen), `taler <spieler> <betrag>` setzt sie |
+| `/angeladmin info\|status\|turnier start\|ende\|stopp\|zeit …\|wetter …\|taler …\|geld [spieler] <betrag>\|naechster …\|fisch …\|fischbuch …\|kleidung …\|aufgabe …\|melden\|neubauen\|neuladen` | Verwaltung und Tests (`moinmorni.angelkoenig.admin`); `fisch <spieler> <art> [cm]` legt einen Fang in den Korb, `fischbuch <spieler> alle\|leer\|<art>` füllt oder leert das Fischbuch (für Bilder), `geld [spieler] <betrag>` gibt Taler dazu – ohne Spieler einem selbst (für Owner und Admins zum Testen), `taler <spieler> <betrag>` setzt sie, `kleidung <spieler> <stück>\|alle\|aus` schenkt und zieht Kleidung an (für Bilder) |
 
 Einstellungen stehen in der `config.yml` (Zurück ins Spiel, Tageszeit, Wetter, Biss-Zeiten, Startgeld, Turnier an/aus,
 Abstand, Dauer, Preise).
+
+
+## Eigenes Aussehen (Angelkönig-Paket)
+
+Fische, Hüte und Kleidung tragen ihren Namen als `custom_model_data` (`moinmorni:fisch/<art>`,
+`moinmorni:kleidung/<stück>`; Listen in `docs/fisch-modelle.txt` und `docs/kleidung-modelle.txt`). Das Paket mit den
+Zeichnungen und 3D-Modellen baut das MoinMorni-Netzwerk. Angelkönig bietet es beim Verbinden selbst an, wenn
+`plugins/MorniAngelkoenig/paket.json` (`url`, `sha1`, `id`, `prompt`) da ist – so weiß es, wer das Paket geladen hat,
+und zeigt Hüte als 3D-Modell bzw. Weste, Jacke, Hosen und Stiefel mit eigenem Muster nur denen, die es sehen können;
+alle anderen sehen die gewohnte Lederkleidung. Ohne Paket, auf älteren Versionen und auf Bedrock bleibt alles
+Minecraft.
 
 ## Im Netzwerk
 

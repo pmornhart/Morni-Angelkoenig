@@ -48,6 +48,9 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public final class AngelkoenigPlugin extends JavaPlugin {
 
+    /** Bietet das Angelkönig-Paket beim Verbinden an (eigene Fische, Hüte, Kleidung). */
+    private de.moinmorni.angelkoenig.play.PackOffer packOffer;
+
     private static final String ADMIN = "moinmorni.angelkoenig.admin";
     private static final long SECOND = 20L;
     private static AngelkoenigPlugin instance;
@@ -109,6 +112,9 @@ public final class AngelkoenigPlugin extends JavaPlugin {
         pm.registerEvents(new FishingListener(this), this);
         pm.registerEvents(new GuardListener(this), this);
         pm.registerEvents(seats, this);
+        pm.registerEvents(new de.moinmorni.angelkoenig.play.ClothingLooks(this), this);
+        packOffer = new de.moinmorni.angelkoenig.play.PackOffer(getDataFolder().toPath(), getLogger());
+        pm.registerEvents(packOffer, this);
         Commands commands = new Commands(this);
         for (String name : List.of("angeladmin", "fischbuch", "aufgaben", "wegweiser", "koeder", "kleiderschrank",
                 "turnier", "stats", "top")) {
@@ -356,6 +362,7 @@ public final class AngelkoenigPlugin extends JavaPlugin {
     void reloadSettings() {
         reloadConfig();
         settings = Settings.load(getConfig());
+        packOffer.reload();
         tournaments.reconfigure();
         world.setGameRule(GameRules.ADVANCE_TIME, settings.timeRuns());
     }
@@ -376,6 +383,10 @@ public final class AngelkoenigPlugin extends JavaPlugin {
 
     public Records records() {
         return records;
+    }
+
+    public de.moinmorni.angelkoenig.play.PackOffer packOffer() {
+        return packOffer;
     }
 
     public World world() {
