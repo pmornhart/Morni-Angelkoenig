@@ -18,7 +18,8 @@
   und Spielen): nur die Spielidee „gemütlich angeln, sammeln, verkaufen“, eigene Fische, eigene Namen, eigene Welt.
   Nur Minecraft-Gegenstände und -Blöcke, keine eigenen Texturen – Ausnahme (Philip, 17.11.): die Fische haben eigene
   Zeichnungen im Angelkönig-Paket des Netzwerks (`fish/FishModels`, `custom_model_data`); ohne Paket bleibt der
-  Minecraft-Gegenstand. Neue Art → Zeile in `docs/fisch-modelle.txt` und Zeichnung im Netzwerk-Repo.
+  Minecraft-Gegenstand. Neue Art → Zeile in `docs/fisch-modelle.txt` und Zeichnung im Netzwerk-Repo. Ebenso Hüte und
+  Kleidung (Philip, 17.11., `fish/ClothingModels`, `docs/kleidung-modelle.txt`, 3D-Modelle im Netzwerk-Repo).
 - **Nichts für echtes Geld**: Taler gibt es nur im Spiel (Fänge verkaufen, Aufgaben, Turniere).
 - Die Netzwerk-Schnittstelle `src/api/java/de/moinmorni/api/MoinMorni.java` ist eine Kopie aus `pmornhart/moinmorni.net`
   (`plugins/moinmorni-network/src/main/java/de/moinmorni/api/MoinMorni.java`) und muss **genau gleich** bleiben. Sie wird

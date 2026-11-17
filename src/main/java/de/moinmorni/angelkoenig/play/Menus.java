@@ -324,7 +324,8 @@ public final class Menus {
             ItemStack item = Hotbar.cosmetic(c, lang);
             boolean worn = d.worn(c.slot()) == c;
             item.lore(List.of(Texts.text(lang, worn ? "wardrobe.worn" : "wardrobe.wear")));
-            Items.glow(item, worn || c == Cosmetic.KOENIGSKRONE);
+            // Angezogenes glänzt – nur ohne Paket (über den eigenen 3D-Bildern sähe der Glanz wie lila Farbe aus)
+            Items.glow(item, worn && !ClothingLooks.sees(p));
             m.set(slot++, item, q -> {
                 PlayerData qd = pl.data(q);
                 boolean now = qd.toggleWear(c);

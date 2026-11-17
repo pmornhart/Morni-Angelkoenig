@@ -5,10 +5,14 @@ import de.moinmorni.angelkoenig.Items;
 import de.moinmorni.angelkoenig.Texts;
 import de.moinmorni.angelkoenig.data.PlayerData;
 import de.moinmorni.angelkoenig.fish.Bait;
+import de.moinmorni.angelkoenig.fish.ClothingModels;
 import de.moinmorni.angelkoenig.fish.Cosmetic;
 import de.moinmorni.angelkoenig.fish.Rod;
 import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.Equippable;
 import io.papermc.paper.datacomponent.item.ItemAttributeModifiers;
+import java.util.List;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -19,6 +23,7 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
+import org.bukkit.inventory.meta.components.CustomModelDataComponent;
 
 /**
  * Die Schnellleiste: Angel, Köderdose, Wegweiser, Fischbuch, Aufgaben, Kleiderschrank, zur Lobby – und die Kleidung,
@@ -107,32 +112,69 @@ public final class Hotbar {
         p.getInventory().setItem(BAIT, bait(pl.data(p), pl.lang(p)));
     }
 
-    /** Getragene Kleidung anlegen (nur zum Aussehen, abnehmen geht über den Kleiderschrank). */
+    /**
+     * Getragene Kleidung anlegen (nur zum Aussehen, abnehmen geht über den Kleiderschrank) – in der Fassung, die zum
+     * Paket des Spielers passt (siehe {@link ClothingLooks}).
+     */
     public static void armor(Player p, PlayerData d, String lang) {
         PlayerInventory inv = p.getInventory();
+        boolean pack = ClothingLooks.sees(p);
         for (Cosmetic.Slot slot : Cosmetic.Slot.values()) {
             Cosmetic c = d.worn(slot);
-            EquipmentSlot es = switch (slot) {
-                case HEAD -> EquipmentSlot.HEAD;
-                case CHEST -> EquipmentSlot.CHEST;
-                case LEGS -> EquipmentSlot.LEGS;
-                case FEET -> EquipmentSlot.FEET;
-            };
-            inv.setItem(es, c == null ? null : cosmetic(c, lang));
+            inv.setItem(slot(slot), c == null ? null : worn(c, lang, pack));
         }
+        ClothingLooks.changed(p);
     }
 
+    public static EquipmentSlot slot(Cosmetic.Slot slot) {
+        return switch (slot) {
+            case HEAD -> EquipmentSlot.HEAD;
+            case CHEST -> EquipmentSlot.CHEST;
+            case LEGS -> EquipmentSlot.LEGS;
+            case FEET -> EquipmentSlot.FEET;
+        };
+    }
+
+    /**
+     * Ein Kleidungsstück als Gegenstand (Kleiderschrank, Händler): Lederfarbe für alle ohne Paket, dazu der Modell-Name
+     * {@link ClothingModels#name} – mit dem Angelkönig-Paket zeigt Minecraft dafür das eigene Modell. Die Krone ohne
+     * Verzauberungs-Glanz: ihr Gold glänzt im Paket selbst.
+     */
     public static ItemStack cosmetic(Cosmetic c, String lang) {
         ItemStack item = Items.named(Items.material(c.item()), 1, Texts.text(lang, "cosmetic." + c.id()), null);
         item.editMeta(meta -> {
             if (meta instanceof LeatherArmorMeta leather && c.colour() >= 0) {
                 leather.setColor(Color.fromRGB(c.colour()));
             }
+            CustomModelDataComponent cmd = meta.getCustomModelDataComponent();
+            cmd.setStrings(List.of(ClothingModels.name(c)));
+            meta.setCustomModelDataComponent(cmd);
         });
-        Items.glow(item, c == Cosmetic.KOENIGSKRONE);
         ItemStack out = Items.tool(item, "cosmetic");
         // Kleidung ist nur Schmuck: keine Rüstungspunkte (sonst steht über den Herzen eine Rüstungsleiste)
         out.setData(DataComponentTypes.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.itemAttributes().build());
         return out;
+    }
+
+    /**
+     * Das Stück zum Anziehen. Mit Paket ({@code pack}): Hüte ohne Rüstungs-Aussehen (Minecraft zeigt dann das 3D-Modell
+     * auf dem Kopf), alles andere mit dem eigenen Aussehen {@code moinmorni:kleidung/<stück>}. Ohne Paket bleibt die
+     * gewohnte Rüstung (Lederfarbe, Goldhelm).
+     */
+    public static ItemStack worn(Cosmetic c, String lang, boolean pack) {
+        ItemStack item = cosmetic(c, lang);
+        if (!pack) {
+            return item;
+        }
+        Equippable old = item.getData(DataComponentTypes.EQUIPPABLE);
+        Equippable.Builder look = Equippable.equippable(slot(c.slot()));
+        if (old != null) {
+            look.equipSound(old.equipSound());
+        }
+        if (!ClothingModels.hat(c)) {
+            look.assetId(Key.key(ClothingModels.NAMESPACE, ClothingModels.assetPath(c)));
+        }
+        item.setData(DataComponentTypes.EQUIPPABLE, look.build());
+        return item;
     }
 }
