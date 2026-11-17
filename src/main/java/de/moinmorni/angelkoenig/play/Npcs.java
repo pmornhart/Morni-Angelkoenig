@@ -1,17 +1,13 @@
 package de.moinmorni.angelkoenig.play;
 
-import de.moinmorni.angelkoenig.Items;
-
-import de.moinmorni.angelkoenig.fish.Species;
-
 import de.moinmorni.angelkoenig.AngelkoenigPlugin;
+import de.moinmorni.angelkoenig.fish.Species;
 import de.moinmorni.angelkoenig.world.Layout;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Boat;
 import org.bukkit.entity.Cat;
@@ -109,7 +105,7 @@ public final class Npcs {
                     FishItems.look(i % 2 == 0 ? Species.BACHFORELLE : Species.RENKE), 0.6f, false, 90f));
         }
         trout = display(new Location(w(), Layout.FOUNTAIN_X + 0.5, Layout.STAND_Y + 3.25, Layout.FOUNTAIN_Z + 0.5),
-                Items.glow(FishItems.look(Species.GOLDFORELLE), true), 1.4f, false, 0f);
+                FishItems.look(Species.GOLDFORELLE), 1.4f, false, 0f);
         trout.setInterpolationDuration(20);
         entities.add(trout);
     }

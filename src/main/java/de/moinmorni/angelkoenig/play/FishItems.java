@@ -87,7 +87,9 @@ public final class FishItems {
             meta.setMaxStackSize(1);
             model(meta, s);
             meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_DYE, ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
-            if (s.shines() || c.trophy()) {
+            // Legenden schimmern über ihre eigene bewegte Zeichnung (der lila Verzauberungs-Glanz überdeckte die Farben);
+            // große Fänge anderer Arten glänzen weiter
+            if (c.trophy() && !s.shines()) {
                 meta.setEnchantmentGlintOverride(true);
             }
             if (meta instanceof LeatherArmorMeta leather) {
