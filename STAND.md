@@ -25,6 +25,19 @@ Kennung im Netzwerk `angelkoenig`, englisch „Angler King“.
 
 ## Stand (16.11.2026)
 
+- Version 0.2.0 (Branch `claude/fisch-designs`, 17.11., wartet auf Philips Go): **Jeder Fisch mit eigenem Aussehen**
+  (Philip: „die Fische alle ein custom design“ – ersetzt für die Fische „nur Minecraft-Gegenstände“). `fish/FishModels`:
+  jeder Fang, jeder Fischbuch-Eintrag und die Anzeigen im Tal (Theke, Räucherei, Goldforelle am Brunnen,
+  `FishItems.look`) tragen `custom_model_data` = `moinmorni:fisch/<art>`; die Zeichnungen (eigene Pixel-Kunst,
+  32 × 32, Legenden bewegt) und das Paket baut das Netzwerk (`packages/builder/src/fische/` im Netzwerk-Repo), der
+  Angelkönig-Server bietet es per server.properties an. Ohne Paket bleibt der Minecraft-Gegenstand – das Paket tauscht
+  nur Gegenstände mit diesem Namen. Liste `docs/fisch-modelle.txt` (Name + Gegenstand), `FishModelsTest` prüft sie
+  gegen `Species`, das Netzwerk-Repo hat eine Kopie. Legenden ohne Verzauberungs-Glanz (ihre Zeichnung schimmert
+  selbst; der lila Glanz überdeckte das Gold). 53 Unit-Tests, Paper 26.1 übersetzt. Echt: Paper 26.3 + Angelkönig 0.2.0,
+  Paket per server.properties von einem lokalen HTTP, echter Client 26.3 mit Paket: Fänge im Inventar und in der
+  Hand, Fischbuch, Händler-Fenster, Fische an der Theke mit eigener Zeichnung; ohne Paket die gewohnten
+  Minecraft-Fische (Bilder nur lokal unter `/home/user/mm-cache/bilder-fische/`).
+
 - Version 0.1.1 (Branch `claude/zurueck-ins-spiel`, wartet auf Philips Go): **Zurück ins Spiel** (Philip: „mitten im
   Spiel nochmal fragen, ob man wirklich zur Lobby will; nach einem Absturz zurück ins Spiel“). Netzwerk-Schnittstelle 2
   (byte-gleiche Kopie; `askToLobby`, `playing`, `holdSlot`; älteres Netzwerk-Plugin → `LinkageError` einmal im Log,
@@ -96,6 +109,9 @@ Kennung im Netzwerk `angelkoenig`, englisch „Angler King“.
   Korb (kommen jetzt sicher an); Sitz holte einen nach einer Reise zurück; `brick_planks` gibt es nicht.
 
 ## Offen
+
+- Philip: Go für `main` mit 0.2.0 (eigene Fisch-Zeichnungen; das Paket kommt aus dem Netzwerk-Branch
+  `claude/fisch-designs`).
 
 - Philip: Go für `main` mit 0.1.1 (Zurück ins Spiel, Taler zum Testen).
 - Netzwerk-Repo: Einstellungs-Katalog um `rueckkehr-sekunden` ergänzen (0–600, Vorgabe 90).

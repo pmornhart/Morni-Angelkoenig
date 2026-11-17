@@ -4,6 +4,7 @@ import de.moinmorni.angelkoenig.Items;
 import de.moinmorni.angelkoenig.Texts;
 import de.moinmorni.angelkoenig.fish.Catch;
 import de.moinmorni.angelkoenig.fish.DayTime;
+import de.moinmorni.angelkoenig.fish.FishModels;
 import de.moinmorni.angelkoenig.fish.Species;
 import de.moinmorni.angelkoenig.fish.Spot;
 import java.time.LocalDate;
@@ -21,7 +22,9 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
+import org.bukkit.inventory.meta.components.CustomModelDataComponent;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
@@ -82,8 +85,11 @@ public final class FishItems {
                 pdc.set(trophy, PersistentDataType.BYTE, (byte) 1);
             }
             meta.setMaxStackSize(1);
+            model(meta, s);
             meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_DYE, ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
-            if (s.shines() || c.trophy()) {
+            // Legenden schimmern über ihre eigene bewegte Zeichnung (der lila Verzauberungs-Glanz überdeckte die Farben);
+            // große Fänge anderer Arten glänzen weiter
+            if (c.trophy() && !s.shines()) {
                 meta.setEnchantmentGlintOverride(true);
             }
             if (meta instanceof LeatherArmorMeta leather) {
@@ -91,6 +97,28 @@ public final class FishItems {
             }
         });
         label(item, lang);
+        return item;
+    }
+
+    /**
+     * Eigenes Aussehen der Art: Name als {@code custom_model_data} (siehe {@link FishModels}). Ohne das Fisch-Paket
+     * zeigt Minecraft einfach den Gegenstand aus {@link Species#item()}.
+     */
+    public static void model(ItemMeta meta, Species s) {
+        CustomModelDataComponent cmd = meta.getCustomModelDataComponent();
+        cmd.setStrings(List.of(FishModels.name(s)));
+        meta.setCustomModelDataComponent(cmd);
+    }
+
+    /** Gegenstand einer Art ohne Fang-Daten (Anzeigen im Tal, Fischbuch). */
+    public static ItemStack look(Species s) {
+        ItemStack item = new ItemStack(Items.material(s.item()));
+        item.editMeta(meta -> {
+            model(meta, s);
+            if (meta instanceof LeatherArmorMeta leather) {
+                leather.setColor(Color.fromRGB(0x5A3A22));
+            }
+        });
         return item;
     }
 
