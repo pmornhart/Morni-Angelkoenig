@@ -54,4 +54,18 @@ class PackOfferTest {
         assertTrue(ClothingLooks.bedrock(new UUID(0, 42)));
         assertFalse(ClothingLooks.bedrock(UUID.fromString("180f3b9a-eaa0-3d4d-bf3d-e043a181f23f")));
     }
+
+    @Test
+    void networkPackMeansNoOfferOfOurOwn(@TempDir Path dir) throws IOException {
+        Path file = dir.resolve(PackOffer.FILE);
+        assertFalse(PackOffer.network(file));
+        Files.writeString(file, "{\"netz\": true}\n");
+        assertTrue(PackOffer.network(file));
+        // Nur „netz“ ohne Adresse: kein eigenes Angebot (so liest es auch 0.2.1)
+        assertNull(PackOffer.read(file));
+        Files.writeString(file, "{\"netz\": false}");
+        assertFalse(PackOffer.network(file));
+        Files.writeString(file, "kaputt");
+        assertFalse(PackOffer.network(file));
+    }
 }
