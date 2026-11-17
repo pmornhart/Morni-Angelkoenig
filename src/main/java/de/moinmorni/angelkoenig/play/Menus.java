@@ -391,6 +391,7 @@ public final class Menus {
                 Placeholder.unparsed("hint", hint(lang, s)), Placeholder.unparsed("record", record)));
         ItemStack item = Items.named(Items.material(s.item()), 1, Texts.text(lang, "catch.title",
                 Texts.colour(s.rarity().colour()), Placeholder.unparsed("fish", fish(lang, s))), lore);
+        item.editMeta(meta -> FishItems.model(meta, s));
         return Items.glow(item, s.shines());
     }
 

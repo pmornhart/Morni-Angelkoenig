@@ -1,5 +1,9 @@
 package de.moinmorni.angelkoenig.play;
 
+import de.moinmorni.angelkoenig.Items;
+
+import de.moinmorni.angelkoenig.fish.Species;
+
 import de.moinmorni.angelkoenig.AngelkoenigPlugin;
 import de.moinmorni.angelkoenig.world.Layout;
 import java.util.ArrayList;
@@ -91,19 +95,21 @@ public final class Npcs {
             }));
         }
         // Fische auf Eis an der Theke (Theke bei z = −35, Eis bei x = 10, 11, 13)
-        String[] counter = {"cod", "salmon", "salmon", "cod", "tropical_fish", "cod"};
+        // Eigene Zeichnungen mit dem Fisch-Paket, sonst die Minecraft-Fische
+        Species[] counter = {Species.BARSCH, Species.BACHFORELLE, Species.SEESAIBLING, Species.RENKE,
+            Species.HUCHEN, Species.ROTAUGE};
         double[][] spots = {{10.3, -34.6}, {10.7, -34.3}, {11.4, -34.6}, {11.7, -34.35}, {13.3, -34.5}, {13.7, -34.6}};
         for (int i = 0; i < spots.length; i++) {
-            entities.add(display(new Location(w(), spots[i][0], Layout.STAND_Y + 1.03, spots[i][1]), counter[i],
-                    0.45f, true, 25f * i));
+            entities.add(display(new Location(w(), spots[i][0], Layout.STAND_Y + 1.03, spots[i][1]),
+                    FishItems.look(counter[i]), 0.45f, true, 25f * i));
         }
         // Räucherfische an der Stange neben dem Fischerhaus
         for (int i = 0; i < 4; i++) {
-            entities.add(display(new Location(w(), 15.5, Layout.STAND_Y + 2.45, -55.3 + i * 1.1), i % 2 == 0
-                    ? "salmon" : "cod", 0.6f, false, 90f));
+            entities.add(display(new Location(w(), 15.5, Layout.STAND_Y + 2.45, -55.3 + i * 1.1),
+                    FishItems.look(i % 2 == 0 ? Species.BACHFORELLE : Species.RENKE), 0.6f, false, 90f));
         }
         trout = display(new Location(w(), Layout.FOUNTAIN_X + 0.5, Layout.STAND_Y + 3.25, Layout.FOUNTAIN_Z + 0.5),
-                "tropical_fish", 1.4f, false, 0f);
+                Items.glow(FishItems.look(Species.GOLDFORELLE), true), 1.4f, false, 0f);
         trout.setInterpolationDuration(20);
         entities.add(trout);
     }
@@ -123,10 +129,10 @@ public final class Npcs {
         });
     }
 
-    private ItemDisplay display(Location l, String item, float scale, boolean flat, float yaw) {
+    private ItemDisplay display(Location l, ItemStack item, float scale, boolean flat, float yaw) {
         return w().spawn(l, ItemDisplay.class, d -> {
             d.setPersistent(false);
-            d.setItemStack(new ItemStack(Material.valueOf(item.toUpperCase(java.util.Locale.ROOT))));
+            d.setItemStack(item);
             Quaternionf rot = new Quaternionf();
             rot.rotateY((float) Math.toRadians(yaw));
             if (flat) {
