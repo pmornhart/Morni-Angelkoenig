@@ -73,6 +73,10 @@ und zeigt Hüte als 3D-Modell bzw. Weste, Jacke, Hosen und Stiefel mit eigenem M
 alle anderen sehen die gewohnte Lederkleidung. Ohne Paket, auf älteren Versionen und auf Bedrock bleibt alles
 Minecraft.
 
+Im MoinMorni-Netzwerk steht in `paket.json` nur `{"netz": true}`: Das Paket kommt dann vom Proxy, einmal beim Betreten
+des Netzwerks, und gilt auf allen Servern (kein Laden beim Wechseln). Angelkönig bietet selbst nichts an und liest aus
+den Metadaten `moinmorni:paket` des Spielers, ob er es geladen hat.
+
 ## Im Netzwerk
 
 Mit dem Netzwerk-Plugin („MoinMorni“, Schnittstelle `de.moinmorni.api.MoinMorni`): Sprache, Party (wer später kommt,

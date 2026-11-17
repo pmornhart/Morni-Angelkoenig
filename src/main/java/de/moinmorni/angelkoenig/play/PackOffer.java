@@ -34,6 +34,11 @@ import org.bukkit.packs.ResourcePack;
  * MoinMorni-Netzwerk) – oder von Hand. Angelkönig legt beim Start {@code paket-angebot} an: daran erkennt das
  * Netzwerk, dass es das Paket nicht mehr in die server.properties schreiben muss. Steht dasselbe Paket trotzdem in der
  * server.properties, bietet Angelkönig es nicht noch einmal an (sonst lädt der Client es zweimal).
+ *
+ * <p>Ab 0.2.2: Steht in {@code paket.json} nur {@code {"netz": true}}, kommt das Paket vom MoinMorni-Netzwerk – der
+ * Proxy bietet es einmal beim Betreten des Netzwerks an (ein Paket für alle Server, kein Laden beim Wechseln). Dann
+ * bietet Angelkönig nichts an und liest, wer es geladen hat, aus den Metadaten {@code moinmorni:paket} des Spielers
+ * (setzt das Netzwerk-Plugin, {@link ClothingLooks#sees}).
  */
 public final class PackOffer implements Listener {
 
@@ -52,6 +57,8 @@ public final class PackOffer implements Listener {
     private final Path folder;
     private final Logger log;
     private volatile Pack pack;
+    /** Kommt das Paket vom Netzwerk ({@code "netz": true})? */
+    private static volatile boolean fromNetwork;
 
     public PackOffer(Path folder, Logger log) {
         this.folder = folder;
@@ -62,10 +69,32 @@ public final class PackOffer implements Listener {
 
     /** Paket aus {@code paket.json} lesen (fehlt die Datei oder ist sie leer: kein Paket). */
     public void reload() {
-        pack = read(folder.resolve(FILE));
+        Path file = folder.resolve(FILE);
+        fromNetwork = network(file);
+        pack = fromNetwork ? null : read(file);
         ClothingLooks.ownPack = pack == null ? null : pack.id();
-        if (pack != null) {
+        if (fromNetwork) {
+            log.info("Angelkönig-Paket kommt vom Netzwerk (Proxy) – ich biete selbst keins an");
+        } else if (pack != null) {
             log.info("Angelkönig-Paket: " + pack.url() + " (biete ich beim Verbinden an)");
+        }
+    }
+
+    /** Kommt das Paket vom MoinMorni-Netzwerk (dann sagen die Metadaten des Spielers, ob er es hat)? */
+    public static boolean fromNetwork() {
+        return fromNetwork;
+    }
+
+    /** {@code {"netz": true}} in {@code paket.json}? */
+    static boolean network(Path file) {
+        try {
+            if (!Files.isRegularFile(file)) {
+                return false;
+            }
+            JsonObject o = new Gson().fromJson(Files.readString(file, StandardCharsets.UTF_8), JsonObject.class);
+            return o != null && o.has("netz") && o.get("netz").isJsonPrimitive() && o.get("netz").getAsBoolean();
+        } catch (IOException | RuntimeException e) {
+            return false;
         }
     }
 

@@ -47,6 +47,13 @@ Kennung im Netzwerk `angelkoenig`, englisch „Angler King“.
   dem Kopf (F5 von vorn und hinten), Weste, Regenjacke, Lederhose, Wathose, Gummistiefel am Körper, Kleiderschrank mit
   3D-Bildern; ohne Paket Lederkleidung und Goldhelm (Bilder nur lokal `/home/user/mm-cache/bilder-kleidung/`).
 
+- Version 0.2.2 (Branch `claude/netzpaket`, 17.11., wartet auf Philips Go): **Ein Paket fürs ganze Netzwerk**
+  (Philip: „nicht jedes Mal beim Serverwechsel Resource Packs laden“). Schreibt das Netzwerk `{"netz": true}` in
+  `paket.json`, bietet Angelkönig selbst nichts an (das Netzwerk-Paket kommt einmal vom Proxy) und liest aus den
+  Metadaten `moinmorni:paket` (Netzwerk-Plugin, aus dem Profil des Hubs), wer es geladen hat – Kleidung je Betrachter
+  wie bisher, kommt die Meldung erst nach dem Betreten, zieht Angelkönig von selbst um (`ClothingLooks.refreshAll`).
+  0.2.1 liest dieselbe Datei als „kein Paket“. 61 Unit-Tests, Paper 26.1 übersetzt. Nicht echt mit Spielern geprüft.
+
 - Version 0.2.0 (Branch `claude/fisch-designs`, 17.11., wartet auf Philips Go): **Jeder Fisch mit eigenem Aussehen**
   (Philip: „die Fische alle ein custom design“ – ersetzt für die Fische „nur Minecraft-Gegenstände“). `fish/FishModels`:
   jeder Fang, jeder Fischbuch-Eintrag und die Anzeigen im Tal (Theke, Räucherei, Goldforelle am Brunnen,

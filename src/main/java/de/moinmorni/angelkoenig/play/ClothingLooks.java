@@ -46,9 +46,25 @@ public final class ClothingLooks implements Listener {
         Bukkit.getScheduler().runTaskTimer(plugin, this::refreshAll, EVERY, EVERY);
     }
 
+    /** Metadaten des MoinMorni-Netzwerk-Plugins: Netzwerk-Paket geladen (Boolean). */
+    static final String NETWORK_PACK = "moinmorni:paket";
+    private static final String NETWORK_PLUGIN = "MoinMorni";
+    /** Was {@link #sees} beim letzten Rundgang sagte – ändert sich die Meldung des Netzwerks, neu anziehen. */
+    private static final Map<UUID, Boolean> LAST = new ConcurrentHashMap<>();
+
     /** Hat der Spieler das Angelkönig-Paket geladen (und spielt Java)? */
     public static boolean sees(Player p) {
-        return LOADED.contains(p.getUniqueId()) && !bedrock(p.getUniqueId());
+        if (bedrock(p.getUniqueId())) {
+            return false;
+        }
+        return PackOffer.fromNetwork() ? networkPack(p) : LOADED.contains(p.getUniqueId());
+    }
+
+    /** Netzwerk-Paket laut Netzwerk-Plugin (Metadaten {@code moinmorni:paket}); fehlt es: nein. */
+    static boolean networkPack(Player p) {
+        return p.getMetadata(NETWORK_PACK).stream()
+                .filter(v -> v.getOwningPlugin() != null && NETWORK_PLUGIN.equals(v.getOwningPlugin().getName()))
+                .anyMatch(org.bukkit.metadata.MetadataValue::asBoolean);
     }
 
     /** Floodgate gibt Bedrock-Spielern eine UUID mit lauter Nullen vorn (und hat dafür eine eigene Abfrage). */
@@ -112,6 +128,7 @@ public final class ClothingLooks implements Listener {
     @EventHandler
     public void onQuit(PlayerQuitEvent e) {
         LOADED.remove(e.getPlayer().getUniqueId());
+        LAST.remove(e.getPlayer().getUniqueId());
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -134,6 +151,12 @@ public final class ClothingLooks implements Listener {
 
     private void refreshAll() {
         for (Player wearer : plugin.world().getPlayers()) {
+            // Paket vom Netzwerk: Das Profil (mit „Paket geladen“) kommt manchmal erst nach dem Betreten.
+            boolean now = sees(wearer);
+            Boolean before = LAST.put(wearer.getUniqueId(), now);
+            if ((before != null && before) != now) {
+                redress(wearer);
+            }
             showToAll(wearer);
         }
     }
