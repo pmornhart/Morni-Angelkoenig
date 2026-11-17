@@ -3,6 +3,7 @@ package de.moinmorni.angelkoenig.fish;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -11,6 +12,9 @@ import java.util.UUID;
  * Angel-Turnier: startet zu festen Zeiten (alle {@code interval}, z. B. zur vollen Viertelstunde), läuft
  * {@code duration} lang, eine Minute vorher wird es angekündigt. Gewertet wird der schwerste Fisch jeder Person – bei
  * Gleichstand zählt, wer ihn früher gefangen hat. Ohne Server (Zeit kommt von außen), damit es sich prüfen lässt.
+ *
+ * <p>Wer im Tal ist, macht beim laufenden Turnier mit. Wer das Tal verlässt, gibt seinen Platz auf – nach einem
+ * Verbindungsabbruch erst, wenn er nicht rechtzeitig zurück ist ({@code rueckkehr-sekunden}, „Zurück ins Spiel“).
  */
 public final class Tournament {
 
@@ -39,6 +43,16 @@ public final class Tournament {
     public record Skip() implements Event {
     }
 
+    /** Wiederkommen nach einem Verbindungsabbruch. */
+    public enum Return {
+        /** Niemand hat auf ihn gewartet (kein Turnier, oder er war nicht dabei). */
+        NONE,
+        /** Rechtzeitig zurück: Platz und bester Fang zählen weiter. */
+        IN_TIME,
+        /** Zu spät: der Platz ist weg. */
+        TOO_LATE
+    }
+
     private static final Comparator<Entry> ORDER = Comparator.comparingInt(Entry::grams).reversed()
             .thenComparingLong(Entry::at);
 
@@ -51,6 +65,8 @@ public final class Tournament {
     private long nextStart;
     private long endsAt;
     private final Map<UUID, Entry> best = new HashMap<>();
+    /** Wer im laufenden Turnier die Verbindung verloren hat: bis wann sein Platz frei bleibt (in der Reihenfolge des Gehens). */
+    private final Map<UUID, Long> away = new LinkedHashMap<>();
 
     public Tournament(boolean enabled, long intervalMs, long durationMs, long warnMs, int minPlayers, long now) {
         configure(enabled, intervalMs, durationMs, warnMs, minPlayers, now);
@@ -150,6 +166,7 @@ public final class Tournament {
 
     private long begin(long now) {
         best.clear();
+        away.clear();
         phase = Phase.RUNNING;
         endsAt = now + duration;
         return endsAt;
@@ -198,5 +215,65 @@ public final class Tournament {
 
     public Entry entry(UUID uuid) {
         return best.get(uuid);
+    }
+
+    // ---------- Zurück ins Spiel ----------
+
+    /**
+     * Jemand hat im laufenden Turnier das Tal verlassen (Verbindung weg). Mit {@code holdMs > 0} bleibt sein Platz so
+     * lange frei (true); ohne Frist ist er sofort weg (false). Ohne laufendes Turnier passiert nichts (false).
+     */
+    public boolean away(UUID uuid, long now, long holdMs) {
+        if (phase != Phase.RUNNING) {
+            return false;
+        }
+        if (holdMs <= 0) {
+            best.remove(uuid);
+            return false;
+        }
+        away.put(uuid, now + holdMs);
+        return true;
+    }
+
+    /** Wartet das Turnier gerade auf diese Person? */
+    public boolean waitingFor(UUID uuid) {
+        return away.containsKey(uuid);
+    }
+
+    /** Wieder da: rechtzeitig (Platz bleibt), zu spät (Platz weg) oder niemand hat gewartet. */
+    public Return back(UUID uuid, long now) {
+        Long until = away.remove(uuid);
+        if (until == null) {
+            return Return.NONE;
+        }
+        if (phase == Phase.RUNNING && now <= until) {
+            return Return.IN_TIME;
+        }
+        best.remove(uuid);
+        return Return.TOO_LATE;
+    }
+
+    /** Abgelaufene Fristen – in der Reihenfolge des Gehens. Ihre Plätze sind danach frei. */
+    public List<UUID> expired(long now) {
+        List<UUID> out = new ArrayList<>();
+        away.entrySet().removeIf(e -> {
+            if (now > e.getValue()) {
+                out.add(e.getKey());
+                best.remove(e.getKey());
+                return true;
+            }
+            return false;
+        });
+        return out;
+    }
+
+    /**
+     * Turnier vorbei oder abgebrochen: niemand muss mehr zurück. Liefert, auf wen noch gewartet wurde (Angebot
+     * zurücknehmen) – deren Platz hat bis zum Ende gezählt.
+     */
+    public List<UUID> releaseAway() {
+        List<UUID> out = new ArrayList<>(away.keySet());
+        away.clear();
+        return out;
     }
 }

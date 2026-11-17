@@ -10,8 +10,8 @@ softdepend: [MoinMorni]
 
 commands:
   angeladmin:
-    description: Verwaltung und Tests (info, status, turnier, zeit, wetter, taler, naechster, aufgabe, melden, neubauen, neuladen)
-    usage: /angeladmin <info|status|turnier|zeit|wetter|taler|naechster|aufgabe|melden|neubauen|neuladen>
+    description: Verwaltung und Tests (info, status, turnier, zeit, wetter, taler, geld, naechster, aufgabe, melden, neubauen, neuladen)
+    usage: /angeladmin <info|status|turnier|zeit|wetter|taler|geld [spieler] <betrag>|naechster|aufgabe|melden|neubauen|neuladen>
     permission: moinmorni.angelkoenig.admin
   fischbuch:
     description: Dein Fischbuch (Sammlung, Rekorde, Werte)

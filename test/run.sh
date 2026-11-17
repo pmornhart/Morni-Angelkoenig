@@ -29,6 +29,7 @@ JAVA="$JAVA_HOME/bin/java"
 PAPER_JAR="${PAPER_JAR:-$CACHE/jars/paper-26.1.2.jar}"
 TEMPLATE="${TEMPLATE:-$CACHE/servers/t1}"
 SERVER="${SERVER_DIR:-$CACHE/servers/angelkoenig-test}"
+MEMORY="${MEMORY:-2G}"
 PORT="${PORT:-25970}"
 RCON_PORT="${RCON_PORT:-26070}"
 VIEW="${VIEW:-6}"
@@ -68,8 +69,10 @@ enforce-whitelist=false
 motd=Morni Angelkoenig Test
 allow-flight=true
 EOF
-# Testwerte: schneller Biss, festes Wetter und feste Zeit (der Test stellt beides selbst), Turniere nur per Befehl.
+# Testwerte: schneller Biss, festes Wetter und feste Zeit (der Test stellt beides selbst), Turniere nur per Befehl,
+# Zurück ins Spiel nach 20 Sekunden (der Test kommt einmal rechtzeitig und einmal zu spät zurück).
 cat > "$SERVER/plugins/MorniAngelkoenig/config.yml" <<'EOF'
+rueckkehr-sekunden: 20
 welt: angelkoenig
 welt-ablauf:
   tageszeit-laeuft: false
@@ -112,7 +115,7 @@ done
 echo "== Server starten (Port $PORT, RCON $RCON_PORT)"
 cd "$SERVER"
 : > console.log
-nice -n 15 "$JAVA" -Xms1G -Xmx2G -Dfile.encoding=UTF-8 -Dstdout.encoding=UTF-8 -jar paper.jar --nogui < /dev/null > console.log 2>&1 &
+nice -n 15 "$JAVA" -Xms256M -Xmx"$MEMORY" -Dfile.encoding=UTF-8 -Dstdout.encoding=UTF-8 -jar paper.jar --nogui < /dev/null > console.log 2>&1 &
 PID=$!
 echo "$PID" > server.pid
 stop_server() {

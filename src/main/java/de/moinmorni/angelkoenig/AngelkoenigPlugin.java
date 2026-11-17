@@ -196,10 +196,20 @@ public final class AngelkoenigPlugin extends JavaPlugin {
 
     /** Ins Dorf, Schnellleiste, Kleidung, Leiste, Tafeln in der eigenen Sprache. */
     public void welcome(Player p) {
+        welcome(p, false);
+    }
+
+    /**
+     * Wie {@link #welcome(Player)}; mit {@code keepPlace} (zurück ins laufende Turnier) bleibt man, wo man war – nur wer
+     * nicht im Tal ist, kommt ins Dorf.
+     */
+    public void welcome(Player p, boolean keepPlace) {
         if (p.isInsideVehicle()) {
             p.leaveVehicle();
         }
-        p.teleport(spawn());
+        if (!keepPlace || p.getWorld() != world) {
+            p.teleport(spawn());
+        }
         if (!builder(p)) {
             p.setGameMode(GameMode.ADVENTURE);
         }

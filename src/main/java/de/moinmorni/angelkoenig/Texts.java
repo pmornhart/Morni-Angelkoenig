@@ -460,6 +460,21 @@ public final class Texts {
         t("tourney.info.running", "<gray>Das Angel-Turnier läuft noch <au><time></au>.</gray>",
                 "<gray>The fishing contest has <au><time></au> left.</gray>");
         t("tourney.info.off", "<gray>Turniere sind gerade ausgeschaltet.</gray>", "<gray>Contests are switched off right now.</gray>");
+        // Zurück ins Spiel (Verbindung im Turnier verloren, Platz bleibt eine Weile frei)
+        t("tourney.away", "<gray><white><name></white> hat die Verbindung verloren – der Platz im Turnier bleibt <white><secs> Sekunden</white> frei.</gray>",
+                "<gray><white><name></white> lost the connection – their place in the contest stays free for <white><secs> seconds</white>.</gray>");
+        t("tourney.away.late", "<gray><white><name></white> ist nicht rechtzeitig zurückgekommen – der Platz im Turnier ist frei.</gray>",
+                "<gray><white><name></white> didn't make it back in time – their place in the contest is free.</gray>");
+        t("tourney.left", "<gray><white><name></white> hat das Tal verlassen und ist aus dem Turnier.</gray>",
+                "<gray><white><name></white> left the valley and is out of the contest.</gray>");
+        t("tourney.back.title", "<em>Willkommen zurück!</em>", "<em>Welcome back!</em>");
+        t("tourney.back.sub", "<gray>Das Turnier läuft noch – Petri Heil!</gray>", "<gray>The contest is still on – tight lines!</gray>");
+        t("tourney.back", "<gray>Willkommen zurück! Das Turnier läuft noch und dein Platz ist frei geblieben – angel einfach weiter.</gray>",
+                "<gray>Welcome back! The contest is still on and your place was kept – just keep fishing.</gray>");
+        t("tourney.back.placed", "<gray>Willkommen zurück! Dein Platz im Turnier ist frei geblieben: <white><fish></white> (<au><weight></au>), Platz <white><n></white>.</gray>",
+                "<gray>Welcome back! Your place in the contest was kept: <white><fish></white> (<au><weight></au>), place <white><n></white>.</gray>");
+        t("tourney.back.all", "<gray><white><name></white> ist zurück im Turnier.</gray>",
+                "<gray><white><name></white> is back in the contest.</gray>");
 
         // ---------- Figuren ----------
         t("boatman.name", "<em>Bootsmann Hias</em>", "<em>Hias the Boatman</em>");
@@ -494,9 +509,18 @@ public final class Texts {
         t("top.usage", "<gray>/top [faenge|turniere|rekorde]</gray>", "<gray>/top [catches|wins|records]</gray>");
 
         // ---------- Verwaltung ----------
-        t("admin.usage", "<gray>/angeladmin info|status|turnier <start|ende|stopp>|zeit <morgen|tag|abend|nacht>|wetter <klar|regen|gewitter>|taler <spieler> <betrag>|naechster <spieler> <art> [cm]|fisch <spieler> <art> [cm]|fischbuch <spieler> <alle|leer|art> [cm]|aufgabe <spieler> <0-2> <art:ziel:anzahl:belohnung>|melden|neubauen|neuladen</gray>",
-                "<gray>/angeladmin info|status|turnier <start|ende|stopp>|zeit <morgen|tag|abend|nacht>|wetter <klar|regen|gewitter>|taler <spieler> <betrag>|naechster <spieler> <art> [cm]|fisch <spieler> <art> [cm]|fischbuch <spieler> <alle|leer|art> [cm]|aufgabe <spieler> <0-2> <art:ziel:anzahl:belohnung>|melden|neubauen|neuladen</gray>");
+        t("admin.usage", "<gray>/angeladmin info|status|turnier <start|ende|stopp>|zeit <morgen|tag|abend|nacht>|wetter <klar|regen|gewitter>|taler <spieler> <betrag>|geld [spieler] <betrag>|naechster <spieler> <art> [cm]|fisch <spieler> <art> [cm]|fischbuch <spieler> <alle|leer|art> [cm]|aufgabe <spieler> <0-2> <art:ziel:anzahl:belohnung>|melden|neubauen|neuladen</gray>",
+                "<gray>/angeladmin info|status|turnier <start|ende|stopp>|zeit <morgen|tag|abend|nacht>|wetter <klar|regen|gewitter>|taler <spieler> <betrag>|geld [spieler] <betrag>|naechster <spieler> <art> [cm]|fisch <spieler> <art> [cm]|fischbuch <spieler> <alle|leer|art> [cm]|aufgabe <spieler> <0-2> <art:ziel:anzahl:belohnung>|melden|neubauen|neuladen</gray>");
         t("admin.done", "<em>Erledigt.</em>", "<em>Done.</em>");
+        // Geld zum Testen (Owner und Admins)
+        t("admin.money.usage", "<gray>So geht's: <white>/angeladmin geld [spieler] \\<betrag></white> – Taler dazugeben (1 bis 1.000.000), ohne Spieler bekommst du sie selbst.</gray>",
+                "<gray>Usage: <white>/angeladmin geld [player] \\<amount></white> – add thaler (1 to 1,000,000); without a player they're for you.</gray>");
+        t("admin.money.done", "<gray><white><name></white> hat <au><n> Taler</au> bekommen – jetzt <au><total> Taler</au>.</gray>",
+                "<gray><white><name></white> got <au><n> thaler</au> – now <au><total> thaler</au>.</gray>");
+        t("admin.money.got", "<gray>Du hast <au><n> Taler</au> bekommen – jetzt <au><total> Taler</au>. Viel Spaß beim Testen!</gray>",
+                "<gray>You got <au><n> thaler</au> – now <au><total> thaler</au>. Have fun testing!</gray>");
+        t("admin.money.unknown", "<gray>Niemanden namens <white><name></white> im Tal gefunden.</gray>",
+                "<gray>Nobody called <white><name></white> found in the valley.</gray>");
         t("admin.rebuild", "<gray>Beim nächsten Start entsteht das Tal neu.</gray>", "<gray>The valley will be rebuilt on the next start.</gray>");
         t("admin.reloaded", "<em>Einstellungen neu geladen.</em>", "<em>Settings reloaded.</em>");
     }

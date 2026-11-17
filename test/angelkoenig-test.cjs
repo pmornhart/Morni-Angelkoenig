@@ -80,6 +80,10 @@ const calls = () =>
     .filter(Boolean)
     .map((l) => JSON.parse(l));
 const inWorld = (c) => `execute in minecraft:angelkoenig run ${c}`;
+/** Netzwerk-Aufrufe einer Art für einen Namen (ab Stelle {from} in calls.log). */
+const callsOf = (t, name, from = 0) => calls().slice(from).filter((c) => c.t === t && c.name === name);
+/** rueckkehr-sekunden im Test (test/run.sh). */
+const COMEBACK = 20;
 
 async function waitFor(cond, ms = 5000, step = 100) {
   const start = Date.now();
@@ -242,8 +246,8 @@ async function main() {
   check('Ruderboote liegen am Steg', /: [4-9]\b/.test(boats), boats.trim());
 
   // ------------------------------------------------------------------ Ankunft
-  const anna = await join('Anna');
-  const bert = await join('Bert');
+  let anna = await join('Anna');
+  let bert = await join('Bert');
   check('Ankunft im Dorf am See', near(anna.entity.position, SPAWN, 2.5), JSON.stringify(anna.entity.position));
   check('Abenteuermodus', anna.game.gameMode === 'adventure', anna.game.gameMode);
   check('Schnellleiste: Angel, Köderdose, Wegweiser, Fischbuch, Aufgaben, Kleiderschrank, Lobby',
@@ -446,6 +450,53 @@ async function main() {
   s = await status();
   check('Beide Fänge zählen im Turnier', a1 && b1 && s.t.Anna > 5000 && s.t.Bert > 0, JSON.stringify(s.t));
   check('Führung wird angesagt', sees(bert, /Anna now leads with Pike/) || sees(anna, /Anna führt jetzt/), bert.chats.slice(-3).join(' | '));
+  check('Netzwerk: im Turnier „spielen“ alle im Tal (Nachfrage vor der Lobby)', await waitFor(() =>
+    callsOf('playing', 'Anna').at(-1)?.playing === true && callsOf('playing', 'Bert').at(-1)?.playing === true, 3000),
+  calls().filter((c) => c.t === 'playing').map((c) => `${c.name}:${c.playing}`).join(' '));
+  // Lobby-Knopf mitten im Turnier: das Netzwerk fragt nach (Anna bleibt da)
+  let mark = calls().length;
+  await openWithItem(anna, 8);
+  check('Lobby-Knopf im Turnier: das Netzwerk fragt erst nach', await waitFor(() =>
+    callsOf('ask-lobby', 'Anna', mark).some((c) => c.asked === true), 3000) && !anna.kickReason, JSON.stringify(calls().slice(mark)));
+
+  // ------------------------------------------------------------------ Zurück ins Spiel (rechtzeitig): Anna
+  const annaAt = anna.entity.position.clone();
+  mark = calls().length;
+  clear(anna, bert);
+  anna.quit();
+  check(`Anna verliert die Verbindung: Turnierplatz bleibt ${COMEBACK} s frei (holdSlot ${COMEBACK})`, await waitFor(() =>
+    callsOf('hold-slot', 'Anna', mark).some((c) => c.seconds === COMEBACK), 5000), JSON.stringify(calls().slice(mark)));
+  check('Die anderen erfahren es (englisch)', await waitFor(() => sees(bert, new RegExp(`Anna lost the connection – their place in the contest stays free for ${COMEBACK} seconds`)), 3000),
+    bert.chats.slice(-1)[0]);
+  s = await status();
+  check('Annas Platz zählt weiter, solange sie weg ist', s.t.Anna > 5000 && s.weg === '1', JSON.stringify(s.t) + ` weg=${s.weg}`);
+  await sleep(3000);
+  anna = await join('Anna');
+  check('Anna ist rechtzeitig zurück: „Willkommen zurück!“ mit ihrem Platz', await waitFor(() => anna.titles.some((t) => /Willkommen zurück/.test(t))
+    && sees(anna, /Dein Platz im Turnier ist frei geblieben: Hecht \([\d,]+ kg\), Platz 1/), 4000), `${anna.titles.join(' | ')} / ${anna.chats.join(' | ')}`);
+  check('… und angelt dort weiter, wo sie war (nicht im Dorf)', near(anna.entity.position, annaAt, 2) && !near(anna.entity.position, SPAWN, 5),
+    `${JSON.stringify(annaAt)} → ${JSON.stringify(anna.entity.position)}`);
+  s = await status();
+  check('Netzwerk: Platz wieder frei (holdSlot 0), Anna „spielt“, Platz im Turnier unverändert', callsOf('hold-slot', 'Anna', mark).some((c) => c.seconds === 0)
+    && callsOf('playing', 'Anna', mark).some((c) => c.playing === true) && s.t.Anna > 5000 && s.weg === '0', JSON.stringify(calls().slice(mark)));
+  check('Bert sieht „Anna is back in the contest“', await waitFor(() => sees(bert, /Anna is back in the contest/), 3000));
+
+  // ------------------------------------------------------------------ Zu spät: Bert
+  mark = calls().length;
+  clear(anna);
+  bert.quit();
+  check(`Bert geht: Platz bleibt erst ${COMEBACK} s frei`, await waitFor(() => callsOf('hold-slot', 'Bert', mark).some((c) => c.seconds === COMEBACK), 5000),
+    JSON.stringify(calls().slice(mark)));
+  check(`Nach ${COMEBACK} s: Berts Platz im Turnier ist frei`, await waitFor(() =>
+    sees(anna, /Bert ist nicht rechtzeitig zurückgekommen – der Platz im Turnier ist frei/), (COMEBACK + 10) * 1000, 500),
+  anna.chats.slice(-2).join(' | '));
+  s = await status();
+  check('Netzwerk: Angebot zurückgenommen (holdSlot 0), Bert nicht mehr in der Wertung', callsOf('hold-slot', 'Bert', mark).some((c) => c.seconds === 0)
+    && !('Bert' in s.t) && s.t.Anna > 5000, JSON.stringify(s.t));
+  bert = await join('Bert');
+  check('Bert kommt zu spät: wie sonst ins Dorf (Welcome back, nicht „zurück im Turnier“)', near(bert.entity.position, SPAWN, 3)
+    && sees(bert, /Good to see you again|Schön, dass du wieder da bist/) && !bert.titles.some((t) => /Welcome back!/.test(t)),
+  `${JSON.stringify(bert.entity.position)} ${bert.chats.slice(-2).join(' | ')}`);
   clear(anna, bert);
   const talerBefore = s.players.Anna.taler;
   await cmd('angeladmin turnier ende');
@@ -454,6 +505,9 @@ async function main() {
   s = await status();
   check('Sieg: Anna ist Angelkönig, +250 Taler, 1 Turniersieg', s.koenig === 'Anna' && s.players.Anna.siege === 1
     && s.players.Anna.taler === talerBefore + 250, `${s.koenig} ${s.players.Anna.siege} ${talerBefore}→${s.players.Anna.taler}`);
+  check('Netzwerk: nach dem Turnier spielt niemand mehr', await waitFor(() => ['Anna', 'Bert'].every((n) =>
+    callsOf('playing', n).at(-1)?.playing === false), 3000),
+  ['Anna', 'Bert'].map((n) => `${n}:${callsOf('playing', n).at(-1)?.playing}`).join(' '));
   win = await openWithItem(anna, 7);
   const crown = win?.slots.findIndex((it) => it?.name === 'golden_helmet') ?? -1;
   check('Königskrone im Kleiderschrank', crown >= 0, win && plain(win.title));
@@ -522,9 +576,27 @@ async function main() {
   check('/angeladmin fischbuch leer: keine Art mehr', s.players.Carl?.arten === 0 && s.players.Carl?.faenge === 0,
     JSON.stringify(s.players.Carl));
 
+  // ------------------------------------------------------------------ Verwaltung: Geld zum Testen (Owner/Admin)
+  const carlT0 = (await status()).players.Carl.taler;
+  clear(carl);
+  const give = String((await cmd('angeladmin geld Carl 500'))[0]).replace(/§./g, '');
+  check('/angeladmin geld gibt Taler (Bestätigung und Nachricht)', /Carl hat 500 Taler bekommen/.test(give)
+    && await waitFor(() => sees(carl, /Du hast 500 Taler bekommen/), 2000) && (await status()).players.Carl.taler === carlT0 + 500,
+  `${give} / ${carl.chats.slice(-1)[0]}`);
+  await cmd('op Anna');
+  const annaT0 = (await status()).players.Anna.taler;
+  clear(anna2);
+  anna2.chat('/angeladmin geld 100');
+  check('… und sich selbst (/angeladmin geld 100)', await waitFor(async () => sees(anna2, /Du hast 100 Taler bekommen/)
+    && (await status()).players.Anna.taler === annaT0 + 100, 3000), anna2.chats.slice(-1)[0]);
+  await cmd('deop Anna');
+  const bad = String((await cmd('angeladmin geld Carl null'))[0]).replace(/§./g, '');
+  check('… ein falscher Betrag erklärt den Befehl', /So geht's: \/angeladmin geld/.test(bad), bad);
+
   // ------------------------------------------------------------------ Lobby
   await openWithItem(bert, 8);
-  check('Lobby-Knopf schickt zur Lobby (Netzwerk)', await waitFor(() => calls().some((c) => c.t === 'to-lobby' && c.name === 'Bert'), 3000));
+  check('Lobby-Knopf ohne Turnier: zur Lobby ohne Nachfrage (Netzwerk)', await waitFor(() =>
+    calls().some((c) => c.t === 'ask-lobby' && c.name === 'Bert' && c.asked === false), 3000));
 
   for (const b of [anna2, carl]) b.quit();
   await sleep(1500);
